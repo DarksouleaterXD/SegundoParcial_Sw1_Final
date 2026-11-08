@@ -1,0 +1,158 @@
+export type UmlVisibility =
+  | 'PUBLIC'
+  | 'PRIVATE'
+  | 'PROTECTED'
+  | 'PACKAGE';
+
+export type UmlDataType =
+  | 'STRING'
+  | 'INTEGER'
+  | 'LONG'
+  | 'DECIMAL'
+  | 'BOOLEAN'
+  | 'DATE'
+  | 'DATETIME'
+  | 'UUID'
+  | 'CUSTOM';
+
+export type UmlRelationshipType =
+  | 'ASSOCIATION'
+  | 'AGGREGATION'
+  | 'COMPOSITION'
+  | 'GENERALIZATION';
+
+export interface UmlAttribute {
+  id: string;
+  name: string;
+  dataType: UmlDataType;
+  customTypeName: string | null;
+  visibility: UmlVisibility;
+  nullable: boolean;
+  identifier: boolean;
+}
+
+export interface UmlClass {
+  methods?: UmlMethod[];
+  id: string;
+  name: string;
+  attributes: UmlAttribute[];
+}
+
+/** A first-class UML AssociationClass, linked to one existing association. */
+export interface UmlAssociationClass {
+  methods?: UmlMethod[];
+  id: string;
+  name: string;
+  associationId: string;
+  attributes: UmlAttribute[];
+}
+
+export type UmlClassifier = UmlClass | UmlAssociationClass;
+
+export interface UmlMethod {
+  id: string;
+  name: string;
+  visibility: UmlVisibility;
+  returnType: string;
+  parameters: { name: string; type: string }[];
+}
+
+export interface Multiplicity {
+  lower: number;
+  upper: number | null;
+}
+
+export interface UmlRelationship {
+  id: string;
+  sourceClassId: string;
+  targetClassId: string;
+  type: UmlRelationshipType;
+  sourceMultiplicity: Multiplicity | null;
+  targetMultiplicity: Multiplicity | null;
+}
+
+export interface UmlModel {
+  classes: UmlClass[];
+  relationships: UmlRelationship[];
+  /** Optional so documents persisted before this feature remain readable. */
+  associationClasses?: UmlAssociationClass[];
+}
+
+export interface DiagramNodeLayout {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface DiagramLayout {
+  nodes: Record<string, DiagramNodeLayout>;
+}
+
+export interface ProjectDocument {
+  schemaVersion: string;
+  umlModel: UmlModel;
+  layout: DiagramLayout;
+}
+
+export type ProjectAccessRole = 'OWNER' | 'EDITOR';
+
+export interface Project {
+  id: string;
+  name: string;
+  accessRole: ProjectAccessRole;
+  revision: number;
+  document: ProjectDocument;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProjectRequest {
+  name: string;
+}
+
+export interface UpdateProjectRequest {
+  name: string;
+}
+
+export interface SaveProjectDocumentRequest {
+  baseRevision: number;
+  document: ProjectDocument;
+}
+
+export type ValidationSeverity =
+  | 'ERROR'
+  | 'WARNING'
+  | 'INFO';
+
+export interface ProjectValidationDiagnostic {
+  severity: ValidationSeverity;
+  code: string;
+  field: string;
+  elementId: string | null;
+  message: string;
+}
+
+export interface ProjectValidationResult {
+  valid: boolean;
+  errors: number;
+  warnings: number;
+  infos: number;
+  diagnostics: ProjectValidationDiagnostic[];
+}
+
+export interface ValidateProjectDocumentRequest {
+  document: ProjectDocument;
+}
+
+export interface BackendValidationViolation {
+  field: string;
+  code: string;
+  message: string;
+}
+
+export interface BackendValidationError {
+  error: string;
+  message: string;
+  violations: BackendValidationViolation[];
+}

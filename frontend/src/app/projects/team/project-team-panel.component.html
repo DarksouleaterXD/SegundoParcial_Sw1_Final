@@ -1,0 +1,37 @@
+<section class="team-panel" aria-label="Conversación y actividad del proyecto">
+  <header>
+    <div><span class="eyebrow">ESPACIO COMPARTIDO</span><h2>Tu equipo, en contexto.</h2></div>
+    <div class="tabs" role="group" aria-label="Contenido del equipo">
+      <button type="button" [class.active]="tab() === 'CHAT'" [attr.aria-pressed]="tab() === 'CHAT'" (click)="tab.set('CHAT')"><span class="material-symbols-rounded" aria-hidden="true">forum</span>Conversación</button>
+      <button type="button" [class.active]="tab() === 'ACTIVITY'" [attr.aria-pressed]="tab() === 'ACTIVITY'" (click)="tab.set('ACTIVITY')"><span class="material-symbols-rounded" aria-hidden="true">history</span>Actividad</button>
+      <button type="button" [class.active]="tab() === 'SUMMARY'" [attr.aria-pressed]="tab() === 'SUMMARY'" (click)="tab.set('SUMMARY')"><span class="material-symbols-rounded" aria-hidden="true">summarize</span>Resumen</button>
+    </div>
+  </header>
+  @if (tab() === 'SUMMARY') {
+    <app-project-activity-summary [projectId]="projectId()" />
+  } @else {
+  <p class="intro">{{ tab() === 'CHAT' ? 'Mensajes guardados para los miembros de este proyecto. Este chat es del equipo; el asistente de IA se abre por separado.' : 'Cambios confirmados desde la activación del historial. Las operaciones anteriores no se reconstruyen.' }} Actualización cada 4 segundos.</p>
+  @if (error()) { <p class="error" role="status">{{ error() }}</p> }
+  <div class="history" tabindex="0" [attr.aria-label]="tab() === 'CHAT' ? 'Historial de mensajes' : 'Historial de actividad'">
+    @if (nextBefore() !== null) { <button class="older" type="button" [disabled]="loadingOlder()" (click)="older()">{{ loadingOlder() ? 'Cargando…' : 'Cargar anteriores' }}</button> }
+    @if (loading()) { <p class="empty" role="status">Cargando historial…</p> }
+    @for (entry of visible(); track entry.id) {
+      <article [class.mine]="entry.actorId === auth.user()?.id" [class.activity]="tab() === 'ACTIVITY'">
+        <div class="entry-heading"><strong>{{ entry.actorName }}</strong><time [attr.datetime]="entry.createdAt">{{ entry.createdAt | date:'dd/MM HH:mm' }}</time></div>
+        <p>{{ tab() === 'CHAT' ? entry.body : action(entry) }}</p>
+        @if (tab() === 'ACTIVITY') {
+          <div class="metadata">@if (entry.revision !== null) { <span>Revisión {{ entry.revision }}</span> } @if (entry.elementId) { <span>Elemento {{ entry.elementId }}</span> }</div>
+        }
+      </article>
+    } @empty { @if (!loading() && !error()) { <div class="empty"><span class="material-symbols-rounded" aria-hidden="true">{{ tab() === 'CHAT' ? 'chat_bubble' : 'history' }}</span><p>{{ tab() === 'CHAT' ? 'Inicia la conversación con tu equipo.' : 'Los próximos cambios del modelo aparecerán aquí.' }}</p></div> } }
+  </div>
+  @if (tab() === 'CHAT') {
+    <form (ngSubmit)="send()">
+      <label for="team-message">Mensaje para el equipo</label>
+      <textarea id="team-message" name="message" [(ngModel)]="draft" maxlength="2000" rows="2" [disabled]="sending()" placeholder="Comparte una idea o una decisión del proyecto…"></textarea>
+      <div class="compose-footer"><small>{{ draft.length }} / 2000</small><button type="submit" [disabled]="sending() || !draft.trim()">{{ sending() ? 'Enviando…' : 'Enviar mensaje' }}<span class="material-symbols-rounded" aria-hidden="true">arrow_upward</span></button></div>
+      @if (sendError()) { <p class="error" role="alert">{{ sendError() }}</p> }
+    </form>
+  }
+  }
+</section>

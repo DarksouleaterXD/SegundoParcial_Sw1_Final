@@ -1,0 +1,1622 @@
+<section class="workspace-shell" [class.is-focused]="focusMode()">
+  <nav
+    class="breadcrumbs"
+    aria-label="Navegacion"
+  >
+    <a
+      mat-button
+      class="cf-button-secondary"
+      routerLink="/projects"
+    >
+      <span
+        class="material-symbols-rounded"
+        aria-hidden="true"
+      >
+        arrow_back
+      </span>
+      Proyectos
+    </a>
+
+    <span aria-hidden="true">/</span>
+
+    <span>
+      {{ store.project()?.name ?? 'Cargando...' }}
+    </span>
+  </nav>
+
+  @if (
+    store.errorMessage()
+    && !store.project()
+  ) {
+    <div
+      class="feedback-panel error-panel"
+      role="alert"
+    >
+      <span
+        class="material-symbols-rounded feedback-icon"
+        aria-hidden="true"
+      >
+        error
+      </span>
+
+      <p>{{ store.errorMessage() }}</p>
+
+      <div class="feedback-actions">
+        <button
+          mat-button
+          class="cf-button-secondary"
+          type="button"
+          (click)="retry()"
+        >
+          <span
+            class="material-symbols-rounded"
+            aria-hidden="true"
+          >
+            refresh
+          </span>
+          Reintentar
+        </button>
+
+        <a
+          mat-button
+          class="cf-button-secondary"
+          routerLink="/projects"
+        >
+          Volver a proyectos
+        </a>
+      </div>
+    </div>
+  } @else if (store.loading()) {
+    <div
+      class="feedback-panel"
+      aria-live="polite"
+    >
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Abriendo proyecto...</p>
+    </div>
+  } @else if (
+    store.project();
+    as currentProject
+  ) {
+    <header class="workspace-heading">
+      <div class="title-block">
+        <p class="eyebrow">
+          WORKSPACE
+        </p>
+
+        @if (editingName()) {
+          <div class="rename-row">
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
+              <mat-label>
+                Nombre del proyecto
+              </mat-label>
+
+              <input
+                matInput
+                maxlength="120"
+                [formControl]="nameControl"
+                (keyup.enter)="rename()"
+                (keyup.escape)="cancelRename()"
+              />
+            </mat-form-field>
+
+            <div class="rename-actions">
+              <button
+                mat-flat-button
+                class="cf-button-primary"
+                type="button"
+                [disabled]="store.renaming()"
+                (click)="rename()"
+              >
+                <span
+                  class="material-symbols-rounded"
+                  aria-hidden="true"
+                >
+                  check
+                </span>
+                Guardar nombre
+              </button>
+
+              <button
+                mat-button
+                class="cf-button-secondary"
+                type="button"
+                (click)="cancelRename()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="title-row">
+            <h1>{{ currentProject.name }}</h1>
+
+            <!-- C2-CU31-001-OWNER-RENAME -->
+            @if (currentProject.accessRole === 'OWNER') {
+<button
+              mat-button
+              class="cf-button-secondary rename-button"
+              type="button"
+              (click)="startRename()"
+            >
+              <span
+                class="material-symbols-rounded"
+                aria-hidden="true"
+              >
+                edit
+              </span>
+              Renombrar
+            </button>
+            }
+          </div>
+        }
+
+      </div>
+
+      <div class="save-toolbar">
+        <button mat-button class="cf-button-secondary focus-button" type="button" (click)="focusMode.set(!focusMode())" [attr.aria-pressed]="focusMode()" [title]="focusMode() ? 'Salir del modo enfoque (Esc)' : 'Ampliar el espacio de trabajo'">
+          <span class="material-symbols-rounded" aria-hidden="true">{{ focusMode() ? 'close_fullscreen' : 'open_in_full' }}</span>
+          {{ focusMode() ? 'Salir del enfoque' : 'Modo enfoque' }}
+        </button>
+        <button mat-button class="cf-button-secondary" type="button" (click)="openCollaborators()">
+          <span class="material-symbols-rounded" aria-hidden="true">group</span>
+          Equipo · {{ presence.participantCount() }}
+        </button>
+        <button
+          mat-button
+          class="cf-button-secondary"
+          type="button"
+          [disabled]="springBootExportBlockReason() !== null"
+          [title]="
+            springBootExportBlockReason()
+            ?? 'Importar o exportar un archivo XMI'
+          "
+          (click)="openXmiInterchange()"
+        >
+          <span
+            class="material-symbols-rounded"
+            aria-hidden="true"
+          >
+            swap_horiz
+          </span>
+          Importar / exportar
+        </button>
+
+        <button
+          mat-button
+          class="cf-button-secondary spring-export-button"
+          type="button"
+          [disabled]="springBootExportBlockReason() !== null"
+          [title]="
+            springBootExportBlockReason()
+            ?? 'Configurar y descargar el backend Spring Boot generado'
+          "
+          (click)="openSpringBootExport()"
+        >
+          <span
+            class="material-symbols-rounded"
+            aria-hidden="true"
+          >
+            download
+          </span>
+          Descargar backend
+        </button>
+
+      </div>
+    </header>
+
+    <div class="workspace-tools" aria-label="Herramientas del proyecto">
+      <div class="project-state" role="status">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ store.collaborationStatusIcon() }}</span>
+        <span>{{ store.collaborationStatusText() }} · {{ saveStateText(store.saveState()) }}</span>
+        <small>Revisión {{ store.revision() }}</small>
+      </div>
+      <button mat-button class="cf-button-secondary" type="button" (click)="save()"
+        [disabled]="!store.dirty() || store.saving() || store.realtimeActive()">
+        <span class="material-symbols-rounded" aria-hidden="true">save</span> Guardar
+      </button>
+      <button mat-button class="cf-button-secondary" type="button" [attr.aria-expanded]="assistantOpen()" aria-controls="text-assistant"
+        (click)="toggleTextAssistant()"><span class="material-symbols-rounded" aria-hidden="true">auto_awesome</span> Texto y voz</button>
+      <button mat-button class="cf-button-secondary" type="button" [attr.aria-expanded]="imageAssistantOpen()" aria-controls="image-assistant"
+        (click)="imageAssistantOpen.set(!imageAssistantOpen())"><span class="material-symbols-rounded" aria-hidden="true">image</span> Imagen a UML</button>
+      <a mat-button class="cf-button-secondary" routerLink="/guide" fragment="generated">Guía del backend</a>
+    </div>
+
+    @if (
+      store.collaborationMessage();
+      as collaborationMessage
+    ) {
+      <div
+        class="collaboration-banner"
+        [class.is-warning]="
+          store.collaborationStatus() === 'local_changes'
+          || store.collaborationStatus() === 'conflict'
+        "
+        [class.is-error]="
+          store.collaborationStatus() === 'error'
+        "
+        role="status"
+      >
+        <span
+          class="material-symbols-rounded"
+          aria-hidden="true"
+        >
+          {{ store.collaborationStatusIcon() }}
+        </span>
+
+        <div>
+          <strong>
+            Colaboracion
+          </strong>
+          <p>
+            {{ collaborationMessage }}
+          </p>
+        </div>
+
+        @if (
+          store.collaborationStatus() === 'disconnected'
+          || store.collaborationStatus() === 'error'
+        ) {
+          <button
+            mat-button
+            class="cf-button-secondary"
+            type="button"
+            [disabled]="store.dirty()"
+            (click)="store.reconnectCollaboration()"
+          >
+            <span
+              class="material-symbols-rounded"
+              aria-hidden="true"
+            >
+              sync
+            </span>
+            Reconectar
+          </button>
+        }
+      </div>
+    }
+
+    @if (store.errorMessage()) {
+      <div
+        class="workspace-alert"
+        [class.conflict-alert]="
+          store.saveState() === 'conflict'
+        "
+        role="alert"
+      >
+        <span
+          class="material-symbols-rounded"
+          aria-hidden="true"
+        >
+          {{
+            store.saveState() === 'conflict'
+              ? 'warning'
+              : 'error'
+          }}
+        </span>
+
+        <div class="alert-copy">
+          <strong>
+            {{
+              store.saveState() === 'conflict'
+                ? 'El documento cambio'
+                : 'Revisa el modelo'
+            }}
+          </strong>
+
+          <p>{{ store.errorMessage() }}</p>
+
+          @if (
+            store.validationViolations().length
+              > 0
+          ) {
+            <ul class="validation-list">
+              @for (
+                violation
+                  of store.validationViolations();
+                track
+                  violation.field
+                  + violation.code
+              ) {
+                <li>
+                  <strong>
+                    {{ violation.message }}
+                  </strong>
+
+                  <small>
+                    {{ violation.field }}
+                  </small>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        @if (
+          store.saveState() === 'conflict'
+        ) {
+          <button
+            mat-button
+            class="cf-button-secondary"
+            type="button"
+            (click)="retry()"
+          >
+            <span
+              class="material-symbols-rounded"
+              aria-hidden="true"
+            >
+              refresh
+            </span>
+            Recargar revision
+            {{ store.conflictRevision() }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="diagram-workbench">
+      <section
+        #diagramSection
+        class="diagram-section"
+        aria-label="Diagrama de clases"
+        tabindex="-1"
+      >
+        <app-uml-canvas
+          [document]="store.documentDraft()"
+          [requestedSelection]="diagramSelection()"
+          [validating]="store.validating()"
+          [canUndo]="store.canUndo()"
+          [canRedo]="store.canRedo()"
+          [remoteParticipants]="
+            presence.remoteParticipants()
+          "
+          (createClassRequested)="createClass()"
+          (undoRequested)="store.undo()"
+          (redoRequested)="store.redo()"
+          (validateRequested)="validateModel()"
+          (editClassRequested)="
+            editClassById($event)
+          "
+          (editRelationshipRequested)="
+            editRelationshipById($event)
+          "
+          (relationshipRequested)="
+            createRelationshipFromCanvas($event)
+          "
+          (selectionChanged)="
+            selectDiagramElement($event)
+          "
+          (classMoved)="moveClass($event)"
+          (cursorMoved)="
+            movePresenceCursor($event)
+          "
+        />
+      </section>
+
+      <aside
+        class="workspace-side-rail"
+        aria-label="Panel lateral del workspace"
+      >
+        <section
+          class="context-inspector"
+          aria-label="Inspector UML"
+        >
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>
+              <span class="details-title">
+                <span
+                  class="material-symbols-rounded"
+                  aria-hidden="true"
+                >
+                  tune
+                </span>
+                Propiedades
+              </span>
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            @if (
+              selectedClass();
+              as umlClass
+            ) {
+              <div class="inspector-content">
+                <span class="inspector-kind">
+                  CLASE / SELECCIÓN
+                </span>
+
+                <h3>{{ umlClass.name }}</h3>
+                <app-class-methods [classifier]="umlClass" />
+
+                                @if (
+                  presence.participantsOnElement(
+                    umlClass.id
+                  ).length > 0
+                ) {
+                  <div class="element-presence">
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      person
+                    </span>
+
+                    <span>
+                      {{
+                        presence.participantsOnElement(
+                          umlClass.id
+                        )[0].actor.displayName
+                      }}
+                      esta trabajando aqui
+                    </span>
+                  </div>
+                }
+<dl class="inspector-facts">
+                  <div>
+                    <dt>Atributos</dt>
+                    <dd>
+                      {{
+                        umlClass.attributes.length
+                      }}
+                    </dd>
+                  </div>
+                </dl>
+
+                @if (umlClass.attributes.length > 0) {
+                  <div class="property-fields" aria-label="Atributos de la clase">
+                    @for (attribute of umlClass.attributes; track attribute.id) {
+                      <div class="property-field">
+                        <span class="material-symbols-rounded" aria-hidden="true">{{ attribute.identifier ? 'key' : 'data_object' }}</span>
+                        <div><strong>{{ attribute.name }}</strong><small>{{ dataTypeLabel(attribute) }}</small></div>
+                        <button mat-icon-button type="button" [attr.aria-label]="'Editar atributo ' + attribute.name" (click)="editAttribute(umlClass, attribute)"><span class="material-symbols-rounded" aria-hidden="true">edit</span></button>
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="inspector-actions">
+                  <button
+                    mat-flat-button
+                    class="cf-button-primary"
+                    type="button"
+                    (click)="
+                      addAttribute(umlClass)
+                    "
+                  >
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      add
+                    </span>
+                    Atributo
+                  </button>
+
+                  <button
+                    mat-button
+                    class="cf-button-secondary"
+                    type="button"
+                    (click)="editClass(umlClass)"
+                  >
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      edit
+                    </span>
+                    Editar
+                  </button>
+
+                  <button
+                    mat-button
+                    class="
+                      cf-button-secondary
+                      inspector-danger
+                    "
+                    type="button"
+                    (click)="
+                      deleteClass(umlClass)
+                    "
+                  >
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      delete
+                    </span>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            } @else if (selectedAssociationClass(); as associationClass) {
+              <div class="inspector-content">
+                <span class="inspector-kind">ASSOCIATION CLASS</span>
+                <h3>{{ associationClass.name }}</h3>
+                <app-class-methods [classifier]="associationClass" />
+                <p class="workspace-subtitle">
+                  Asociada a {{ associationClassRelationshipLabel(associationClass) }}
+                </p>
+                <dl class="inspector-facts"><div><dt>Atributos</dt><dd>{{ associationClass.attributes.length }}</dd></div></dl>
+                @if (associationClass.attributes.length > 0) {
+                  <div class="attribute-list">
+                    @for (attribute of associationClass.attributes; track attribute.id) {
+                      <div class="attribute-row">
+                        <span>{{ visibilitySymbol(attribute.visibility) }} {{ attribute.name }} : {{ dataTypeLabel(attribute) }}</span>
+                        <span class="attribute-actions">
+                          <button mat-icon-button type="button" aria-label="Editar atributo" (click)="editAttribute(associationClass, attribute)"><span class="material-symbols-rounded">edit</span></button>
+                          <button mat-icon-button type="button" aria-label="Eliminar atributo" (click)="deleteAttribute(associationClass, attribute)"><span class="material-symbols-rounded">delete</span></button>
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="inspector-actions">
+                  <button mat-flat-button class="cf-button-primary" type="button" (click)="addAttribute(associationClass)">
+                    <span class="material-symbols-rounded" aria-hidden="true">add</span>Atributo
+                  </button>
+                  <button mat-button class="cf-button-secondary" type="button" (click)="editClass(associationClass)">
+                    <span class="material-symbols-rounded" aria-hidden="true">edit</span>Editar
+                  </button>
+                  <button mat-button class="cf-button-secondary inspector-danger" type="button" (click)="deleteAssociationClass(associationClass)">
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>Eliminar
+                  </button>
+                </div>
+              </div>
+            } @else if (
+              selectedRelationship();
+              as relationship
+            ) {
+              <div class="inspector-content">
+                <span class="inspector-kind">
+                  RELATIONSHIP
+                </span>
+
+                <h3>
+                  {{
+                    relationshipTypeLabel(
+                      relationship
+                    )
+                  }}
+                </h3>
+
+                                @if (
+                  presence.participantsOnElement(
+                    relationship.id
+                  ).length > 0
+                ) {
+                  <div class="element-presence">
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      person
+                    </span>
+
+                    <span>
+                      {{
+                        presence.participantsOnElement(
+                          relationship.id
+                        )[0].actor.displayName
+                      }}
+                      esta trabajando aqui
+                    </span>
+                  </div>
+                }
+<div class="relationship-endpoints">
+                  <div>
+                    <span>Origen</span>
+                    <strong>
+                      {{
+                        className(
+                          relationship
+                            .sourceClassId
+                        )
+                      }}
+                    </strong>
+
+                    @if (
+                      relationship.type
+                        !== 'GENERALIZATION'
+                    ) {
+                      <code>
+                        {{
+                          multiplicityLabel(
+                            relationship,
+                            'source'
+                          )
+                        }}
+                      </code>
+                    }
+                  </div>
+
+                  <span
+                    class="material-symbols-rounded"
+                    aria-hidden="true"
+                  >
+                    arrow_forward
+                  </span>
+
+                  <div>
+                    <span>Destino</span>
+                    <strong>
+                      {{
+                        className(
+                          relationship
+                            .targetClassId
+                        )
+                      }}
+                    </strong>
+
+                    @if (
+                      relationship.type
+                        !== 'GENERALIZATION'
+                    ) {
+                      <code>
+                        {{
+                          multiplicityLabel(
+                            relationship,
+                            'target'
+                          )
+                        }}
+                      </code>
+                    }
+                  </div>
+                </div>
+
+                @if (relationship.type === 'ASSOCIATION') {
+                  <div class="inspector-actions">
+                    @if (associationClassFor(relationship.id); as associationClass) {
+                      <span class="inspector-kind">Clase de asociación: {{ associationClass.name }}</span>
+                    } @else {
+                      <button mat-button class="cf-button-secondary" type="button" (click)="createAssociationClass(relationship)">
+                        <span class="material-symbols-rounded" aria-hidden="true">account_tree</span>Crear clase de asociación
+                      </button>
+                    }
+                  </div>
+                }
+
+                <div class="inspector-actions">
+                  <button
+                    mat-flat-button
+                    class="cf-button-primary"
+                    type="button"
+                    (click)="
+                      editRelationship(
+                        relationship
+                      )
+                    "
+                  >
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      edit
+                    </span>
+                    Editar relacion
+                  </button>
+
+                  <button
+                    mat-button
+                    class="
+                      cf-button-secondary
+                      inspector-danger
+                    "
+                    type="button"
+                    (click)="
+                      deleteRelationship(
+                        relationship
+                      )
+                    "
+                  >
+                    <span
+                      class="material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      link_off
+                    </span>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="inspector-empty">
+                <span
+                  class="material-symbols-rounded"
+                  aria-hidden="true"
+                >
+                  arrow_selector_tool
+                </span>
+
+                <strong>
+                  Explora tu modelo
+                </strong>
+
+                <p>
+                  Selecciona una clase o conexión para trabajar en sus detalles.
+                </p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+        </section>
+        <section class="model-outline" aria-label="Elementos del diagrama">
+          <header><span>EXPLORADOR</span><small>{{ store.classes().length + store.associationClasses().length }}</small></header>
+          @for (umlClass of store.classes(); track umlClass.id) {
+            <button type="button" (click)="selectDiagramElement({ kind: 'class', id: umlClass.id })" [class.selected]="selectedClass()?.id === umlClass.id" [attr.aria-pressed]="selectedClass()?.id === umlClass.id">
+              <span class="material-symbols-rounded" aria-hidden="true">deployed_code</span><span>{{ umlClass.name }}</span><small>{{ umlClass.attributes.length }}</small>
+            </button>
+          }
+          @for (associationClass of store.associationClasses(); track associationClass.id) {
+            <button type="button" (click)="selectDiagramElement({ kind: 'class', id: associationClass.id })" [class.selected]="selectedAssociationClass()?.id === associationClass.id" [attr.aria-pressed]="selectedAssociationClass()?.id === associationClass.id">
+              <span class="material-symbols-rounded" aria-hidden="true">account_tree</span><span>{{ associationClass.name }}</span><small>{{ associationClass.attributes.length }}</small>
+            </button>
+          }
+          @if (store.classes().length + store.associationClasses().length === 0) {
+            <p>Tus clases aparecerán aquí.</p>
+          }
+        </section>
+      </aside>
+    </div>
+
+    <section #teamSection class="team-section" aria-label="Equipo del proyecto" tabindex="-1">
+      <app-project-team-panel [projectId]="currentProject.id" [(tab)]="teamTab" />
+    </section>
+
+    <nav class="mobile-workspace-nav" aria-label="Accesos del proyecto">
+      <button type="button" (click)="jumpToSection(diagramSection)">
+        <span class="material-symbols-rounded" aria-hidden="true">account_tree</span>
+        Diagrama
+      </button>
+      <button type="button" (click)="teamTab.set('CHAT'); jumpToSection(teamSection)">
+        <span class="material-symbols-rounded" aria-hidden="true">forum</span>
+        Conversación
+      </button>
+      <button type="button" (click)="teamTab.set('ACTIVITY'); jumpToSection(teamSection)">
+        <span class="material-symbols-rounded" aria-hidden="true">history</span>
+        Actividad
+      </button>
+    </nav>
+
+    <section class="assistant-workbench" aria-label="Asistentes de modelado">
+      @if (assistantOpen()) {
+        <section #textAssistantPanel id="text-assistant" aria-label="Asistente de texto y voz" tabindex="-1">
+          <p class="assistant-context">Consulta el modelo guardado o solicita una propuesta de cambios. Puedes incluir la conversación reciente del equipo al consultar; los cambios requieren revisar y aplicar el plan.</p>
+          <app-project-assistant-panel />
+        </section>
+      }
+      @if (imageAssistantOpen()) {
+        <div id="image-assistant"><p class="assistant-context">Importa una imagen del diagrama y revisa los elementos reconocidos antes de incorporarlos.</p><app-project-image-uml-panel /></div>
+      }
+    </section>
+
+    @if (store.validationRequestError()) {
+      <section
+        class="validation-request-error"
+        role="alert"
+      >
+        <span
+          class="material-symbols-rounded"
+          aria-hidden="true"
+        >
+          cloud_off
+        </span>
+
+        <div>
+          <strong>
+            No se pudo completar la validacion
+          </strong>
+          <p>
+            {{ store.validationRequestError() }}
+          </p>
+        </div>
+
+        <button
+          mat-button
+          class="cf-button-secondary"
+          type="button"
+          (click)="validateModel()"
+        >
+          Reintentar
+        </button>
+      </section>
+    }
+
+    @if (
+      store.validationResult();
+      as validation
+    ) {
+      <section
+        class="validation-panel"
+        [class.has-errors]="
+          validation.errors > 0
+        "
+        aria-labelledby="validation-title"
+      >
+        <header class="validation-header">
+          <div class="validation-title-group">
+            <span
+              class="material-symbols-rounded validation-main-icon"
+              [class.success-icon]="
+                validation.errors === 0
+              "
+              aria-hidden="true"
+            >
+              {{
+                validation.errors === 0
+                  ? 'task_alt'
+                  : 'rule'
+              }}
+            </span>
+
+            <div>
+              <p class="eyebrow">
+                REVISIÓN DEL MODELO
+              </p>
+
+              <h2 id="validation-title">
+                {{
+                  validation.errors === 0
+                    ? (
+                        validation.warnings === 0
+                          ? 'Modelo valido'
+                          : 'Modelo valido con observaciones'
+                      )
+                    : 'El modelo necesita correcciones'
+                }}
+              </h2>
+
+              @if (
+                store.validationCheckedAt();
+                as checkedAt
+              ) {
+                <p class="validation-time">
+                  Validado
+                  {{ checkedAt | date:'mediumTime' }}
+                  · no se guardaron cambios
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="validation-counts">
+            <span class="error-count">
+              <strong>{{ validation.errors }}</strong>
+              errores
+            </span>
+
+            <span class="warning-count">
+              <strong>{{ validation.warnings }}</strong>
+              advertencias
+            </span>
+
+            <span class="info-count">
+              <strong>{{ validation.infos }}</strong>
+              info
+            </span>
+          </div>
+        </header>
+
+        @if (
+          validation.diagnostics.length === 0
+        ) {
+          <div class="validation-clean">
+            <span
+              class="material-symbols-rounded"
+              aria-hidden="true"
+            >
+              verified
+            </span>
+
+            <div>
+              <strong>
+                No encontramos problemas.
+              </strong>
+
+              <p>
+                El documento supera las reglas
+                estructurales y de calidad
+                disponibles en esta iteracion.
+              </p>
+            </div>
+          </div>
+        } @else {
+          <div class="diagnostic-list">
+            @for (
+              diagnostic
+                of validation.diagnostics;
+              track
+                diagnostic.severity
+                + diagnostic.code
+                + diagnostic.field
+            ) {
+              <button
+                type="button"
+                class="diagnostic-row"
+                [class.diagnostic-error]="
+                  diagnostic.severity === 'ERROR'
+                "
+                [class.diagnostic-warning]="
+                  diagnostic.severity === 'WARNING'
+                "
+                [class.diagnostic-info]="
+                  diagnostic.severity === 'INFO'
+                "
+                [class.is-navigable]="
+                  diagnostic.elementId
+                "
+                [disabled]="!diagnostic.elementId"
+                (click)="
+                  selectValidationDiagnostic(
+                    diagnostic
+                  )
+                "
+              >
+                <span
+                  class="material-symbols-rounded diagnostic-icon"
+                  aria-hidden="true"
+                >
+                  {{
+                    validationSeverityIcon(
+                      diagnostic
+                    )
+                  }}
+                </span>
+
+                <span class="diagnostic-copy">
+                  <span class="diagnostic-meta">
+                    <strong>
+                      {{
+                        validationSeverityLabel(
+                          diagnostic
+                        )
+                      }}
+                    </strong>
+
+                    <code>
+                      {{ diagnostic.code }}
+                    </code>
+                  </span>
+
+                  <span class="diagnostic-message">
+                    {{ diagnostic.message }}
+                  </span>
+
+                  <small>
+                    {{ diagnostic.field }}
+                  </small>
+                </span>
+
+                @if (diagnostic.elementId) {
+                  <span
+                    class="material-symbols-rounded diagnostic-target"
+                    aria-label="Mostrar elemento en el canvas"
+                    title="Mostrar elemento en el canvas"
+                  >
+                    center_focus_strong
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <div class="workspace-layout">
+      <section
+        class="model-editor"
+        aria-labelledby="model-editor-title"
+      >
+        <section class="canonical-section" aria-label="Modelo canónico">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">
+              MODELO CANÓNICO
+            </p>
+
+            <h2 id="model-editor-title">
+              Clases y atributos
+            </h2>
+          </div>
+
+          <div class="summary-pills">
+            <span>
+              {{ store.classes().length }}
+              {{
+                store.classes().length === 1
+                  ? 'clase'
+                  : 'clases'
+              }}
+            </span>
+
+            <span>
+              {{ totalAttributeCount() }}
+              {{
+                totalAttributeCount() === 1
+                  ? 'atributo'
+                  : 'atributos'
+              }}
+            </span>
+          </div>
+        
+          <button
+            mat-button
+            type="button"
+            class="section-collapse-button"
+            [attr.aria-expanded]="classesExpanded()"
+            aria-controls="class-model-content"
+            (click)="
+              classesExpanded.set(
+                !classesExpanded()
+              )
+            "
+          >
+            <span
+              class="material-symbols-rounded"
+              aria-hidden="true"
+            >
+              {{
+                classesExpanded()
+                  ? 'expand_less'
+                  : 'expand_more'
+              }}
+            </span>
+            {{
+              classesExpanded()
+                ? 'Contraer'
+                : 'Ver clases'
+            }}
+          </button></div>
+        @if (classesExpanded()) {
+          <div id="class-model-content">
+
+        @if (
+          store.classes().length === 0
+        ) {
+          <mat-card
+            class="empty-model"
+            appearance="outlined"
+          >
+            <mat-card-content>
+              <span
+                class="material-symbols-rounded empty-icon"
+                aria-hidden="true"
+              >
+                data_object
+              </span>
+
+              <p class="eyebrow">
+                SIN CLASES
+              </p>
+
+              <h3>
+                El modelo esta vacio.
+              </h3>
+
+              <p>
+                Crea la primera clase desde el
+                canvas.
+              </p>
+            </mat-card-content>
+          </mat-card>
+        } @else {
+          <div class="class-grid">
+            @for (
+              umlClass of store.classes();
+              track umlClass.id
+            ) {
+              <mat-card
+                class="uml-class-card"
+                appearance="outlined"
+              >
+                <mat-card-header>
+                  <div class="class-header">
+                    <div class="class-identity">
+                      <span
+                        class="material-symbols-rounded class-icon"
+                        aria-hidden="true"
+                      >
+                        data_object
+                      </span>
+
+                      <div>
+                        <span class="class-kind">
+                          CLASS
+                        </span>
+
+                        <h3>
+                          {{ umlClass.name }}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div class="class-actions">
+                      <button
+                        mat-button
+                        class="icon-action"
+                        type="button"
+                        title="Editar clase"
+                        [attr.aria-label]="
+                          'Editar '
+                          + umlClass.name
+                        "
+                        (click)="
+                          editClass(umlClass)
+                        "
+                      >
+                        <span
+                          class="material-symbols-rounded"
+                          aria-hidden="true"
+                        >
+                          edit
+                        </span>
+                      </button>
+
+                      <button
+                        mat-button
+                        class="
+                          icon-action
+                          danger-action
+                        "
+                        type="button"
+                        title="Eliminar clase"
+                        [attr.aria-label]="
+                          'Eliminar '
+                          + umlClass.name
+                        "
+                        (click)="
+                          deleteClass(umlClass)
+                        "
+                      >
+                        <span
+                          class="material-symbols-rounded"
+                          aria-hidden="true"
+                        >
+                          delete
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <app-class-methods [classifier]="umlClass" />
+                  <div class="attribute-section">
+                    <div class="attribute-heading">
+                      <div>
+                        <span>ATRIBUTOS</span>
+
+                        <strong>
+                          {{
+                            umlClass
+                              .attributes
+                              .length
+                          }}
+                        </strong>
+                      </div>
+
+                      <button
+                        mat-button
+                        class="
+                          cf-button-secondary
+                          compact-button
+                        "
+                        type="button"
+                        (click)="
+                          addAttribute(
+                            umlClass
+                          )
+                        "
+                      >
+                        <span
+                          class="material-symbols-rounded"
+                          aria-hidden="true"
+                        >
+                          add
+                        </span>
+                        Atributo
+                      </button>
+                    </div>
+
+                    @if (
+                      umlClass.attributes.length
+                        === 0
+                    ) {
+                      <div
+                        class="empty-attributes"
+                      >
+                        Esta clase aun no tiene
+                        atributos.
+                      </div>
+                    } @else {
+                      <div class="attribute-list">
+                        @for (
+                          attribute
+                            of umlClass.attributes;
+                          track attribute.id
+                        ) {
+                          <div
+                            class="attribute-row"
+                          >
+                            <div
+                              class="attribute-signature"
+                            >
+                              @if (
+                                attribute.identifier
+                              ) {
+                                <span
+                                  class="
+                                    material-symbols-rounded
+                                    key-icon
+                                  "
+                                  aria-label="Identificador"
+                                  title="Identificador"
+                                >
+                                  key
+                                </span>
+                              }
+
+                              <code>
+                                {{
+                                  visibilitySymbol(
+                                    attribute.visibility
+                                  )
+                                }}
+                                {{ attribute.name }}:
+                                {{
+                                  dataTypeLabel(
+                                    attribute
+                                  )
+                                }}
+                              </code>
+
+                              @if (
+                                attribute.nullable
+                              ) {
+                                <span
+                                  class="nullable-badge"
+                                >
+                                  nullable
+                                </span>
+                              }
+                            </div>
+
+                            <div
+                              class="attribute-actions"
+                            >
+                              <button
+                                mat-button
+                                class="icon-action"
+                                type="button"
+                                title="Editar atributo"
+                                [attr.aria-label]="
+                                  'Editar atributo '
+                                  + attribute.name
+                                "
+                                (click)="
+                                  editAttribute(
+                                    umlClass,
+                                    attribute
+                                  )
+                                "
+                              >
+                                <span
+                                  class="material-symbols-rounded"
+                                  aria-hidden="true"
+                                >
+                                  edit
+                                </span>
+                              </button>
+
+                              <button
+                                mat-button
+                                class="
+                                  icon-action
+                                  danger-action
+                                "
+                                type="button"
+                                title="Eliminar atributo"
+                                [attr.aria-label]="
+                                  'Eliminar atributo '
+                                  + attribute.name
+                                "
+                                (click)="
+                                  deleteAttribute(
+                                    umlClass,
+                                    attribute
+                                  )
+                                "
+                              >
+                                <span
+                                  class="material-symbols-rounded"
+                                  aria-hidden="true"
+                                >
+                                  delete
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        }
+
+                  </div>
+        }
+        </section>
+<section
+          class="relationships-section"
+          aria-labelledby="relationships-title"
+        >
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">
+                CONECTORES
+              </p>
+
+              <h2 id="relationships-title">
+                Relaciones
+              </h2>
+            </div>
+
+            <span class="relationship-count">
+              {{ store.relationships().length }}
+            </span>
+          
+            <button
+              mat-button
+              type="button"
+              class="section-collapse-button"
+              [attr.aria-expanded]="relationshipsExpanded()"
+              aria-controls="relationships-content"
+              (click)="
+                relationshipsExpanded.set(
+                  !relationshipsExpanded()
+                )
+              "
+            >
+              <span
+                class="material-symbols-rounded"
+                aria-hidden="true"
+              >
+                {{
+                  relationshipsExpanded()
+                    ? 'expand_less'
+                    : 'expand_more'
+                }}
+              </span>
+              {{
+                relationshipsExpanded()
+                  ? 'Contraer'
+                  : 'Ver relaciones'
+              }}
+            </button></div>
+          @if (relationshipsExpanded()) {
+            <div id="relationships-content">
+
+          @if (
+            store.relationships().length === 0
+          ) {
+            <div class="empty-relationships">
+              <span
+                class="material-symbols-rounded"
+                aria-hidden="true"
+              >
+                add_link
+              </span>
+
+              <div>
+                <strong>
+                  Aun no hay relaciones.
+                </strong>
+
+                <p>
+                  Usa el boton Relacion del
+                  canvas y selecciona origen y
+                  destino.
+                </p>
+              </div>
+            </div>
+          } @else {
+            <div class="relationship-list">
+              @for (
+                relationship
+                  of store.relationships();
+                track relationship.id
+              ) {
+                <article
+                  class="relationship-row"
+                >
+                  <div class="relationship-main">
+                    <span
+                      class="material-symbols-rounded relation-icon"
+                      aria-hidden="true"
+                    >
+                      conversion_path
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{
+                          className(
+                            relationship
+                              .sourceClassId
+                          )
+                        }}
+                        →
+                        {{
+                          className(
+                            relationship
+                              .targetClassId
+                          )
+                        }}
+                      </strong>
+
+                      <span>
+                        {{
+                          relationshipTypeLabel(
+                            relationship
+                          )
+                        }}
+
+                        @if (
+                          relationship.type
+                            !== 'GENERALIZATION'
+                        ) {
+                          ·
+                          {{
+                            multiplicityLabel(
+                              relationship,
+                              'source'
+                            )
+                          }}
+                          →
+                          {{
+                            multiplicityLabel(
+                              relationship,
+                              'target'
+                            )
+                          }}
+                        }
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="relationship-actions">
+                    <button
+                      mat-button
+                      class="icon-action"
+                      type="button"
+                      title="Editar relacion"
+                      aria-label="Editar relacion"
+                      (click)="
+                        editRelationship(
+                          relationship
+                        )
+                      "
+                    >
+                      <span
+                        class="material-symbols-rounded"
+                        aria-hidden="true"
+                      >
+                        edit
+                      </span>
+                    </button>
+
+                    <button
+                      mat-button
+                      class="
+                        icon-action
+                        danger-action
+                      "
+                      type="button"
+                      title="Eliminar relacion"
+                      aria-label="Eliminar relacion"
+                      (click)="
+                        deleteRelationship(
+                          relationship
+                        )
+                      "
+                    >
+                      <span
+                        class="material-symbols-rounded"
+                        aria-hidden="true"
+                      >
+                        link_off
+                      </span>
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+                    </div>
+          }
+</section>
+      </section>
+
+      <aside class="details-panel">
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>
+              <span class="details-title">
+                <span
+                  class="material-symbols-rounded"
+                  aria-hidden="true"
+                >
+                  info
+                </span>
+                Estado del documento
+              </span>
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <dl class="details-list">
+              <div>
+                <dt>Clases</dt>
+                <dd>
+                  {{ store.classes().length }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Atributos</dt>
+                <dd>
+                  {{ totalAttributeCount() }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Relaciones</dt>
+                <dd>
+                  {{
+                    store.relationships().length
+                  }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Posiciones persistibles
+                </dt>
+                <dd>
+                  {{ layoutNodeCount() }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>
+                  Revision persistida
+                </dt>
+                <dd>
+                  {{ currentProject.revision }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Ultimo guardado</dt>
+                <dd>
+                  {{
+                    currentProject.updatedAt
+                      | date:'medium'
+                  }}
+                </dd>
+              </div>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+
+        
+      </aside>
+    </div>
+  }
+</section>

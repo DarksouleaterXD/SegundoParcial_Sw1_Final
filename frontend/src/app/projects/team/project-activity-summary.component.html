@@ -1,0 +1,39 @@
+<section class="summary-panel" aria-label="Resumen de actividad">
+  <p class="explanation">Resumen calculado a partir del historial completo del período, aunque sus entradas no estén cargadas en pantalla. No requiere IA y no interpreta mensajes del chat.</p>
+  <div class="presets" role="group" aria-label="Períodos rápidos">
+    <button type="button" [disabled]="loading()" (click)="preset(1)">Últimas 24 horas</button>
+    <button type="button" [disabled]="loading()" (click)="preset(7)">7 días</button>
+    <button type="button" [disabled]="loading()" (click)="preset(30)">30 días</button>
+  </div>
+  <form (ngSubmit)="load()">
+    <label>Desde<input name="from" type="datetime-local" [(ngModel)]="from" [disabled]="loading()" required /></label>
+    <label>Hasta (exclusivo)<input name="to" type="datetime-local" [(ngModel)]="to" [disabled]="loading()" required /></label>
+    <label>Integrante<select name="actor" aria-label="Integrante" [(ngModel)]="actorId" [disabled]="loading()">
+      <option value="">Todo el equipo</option>
+      @for (actor of result()?.contributors ?? []; track actor.id) { <option [value]="actor.id">{{ actor.name }}</option> }
+    </select></label>
+    <button class="refresh" type="submit" [disabled]="loading()">{{ loading() ? 'Calculando…' : 'Actualizar resumen' }}</button>
+  </form>
+  <p class="timezone">Las fechas usan la zona horaria de tu navegador. El inicio está incluido y el límite final excluido. Máximo 90 días por consulta.</p>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  @if (loading()) { <p class="status" role="status">Calculando el resumen…</p> }
+  @if (result(); as summary) {
+    <div class="summary-heading"><div><span class="eyebrow">ACTIVIDAD CONFIRMADA</span><h3>{{ description(summary) }}</h3>
+      <p>{{ summary.from | date:'dd/MM/yyyy HH:mm' }} → {{ summary.to | date:'dd/MM/yyyy HH:mm' }}</p></div>
+      <button class="copy" type="button" [disabled]="loading()" (click)="copy()">Copiar resumen</button></div>
+    <div class="summary-stats"><div><strong>{{ summary.total }}</strong><span>Operaciones del filtro</span></div>
+      <div><strong>{{ summary.actorId ? (summary.total > 0 ? 1 : 0) : summary.contributors.length }}</strong><span>Integrantes con actividad</span></div>
+      <div><strong>{{ summary.actions.length }}</strong><span>Tipos de operación</span></div></div>
+    @if (summary.actions.length) {
+      <div class="summary-columns"><section aria-label="Operaciones por tipo"><h4>Qué se hizo</h4>
+        @for (item of summary.actions; track item.action) { <div class="count-row"><span>{{ label(item.action) }}</span><strong>{{ item.count }}</strong></div> }</section>
+        <section aria-label="Actividad por integrante"><h4>Quién participó</h4>
+        @for (actor of summary.contributors; track actor.id) { @if (!summary.actorId || summary.actorId === actor.id) {
+          <div class="count-row"><span>{{ actor.name }}</span><strong>{{ actor.count }}</strong></div>
+        } }</section></div>
+    }
+    <p class="footnote">Calculado el {{ summary.generatedAt | date:'dd/MM/yyyy HH:mm:ss' }}. Actualiza el resumen para incluir nuevas operaciones. Cada lote cuenta como una operación, aunque agrupe varios cambios. Los movimientos y el deshacer/rehacer también pueden generar operaciones. El conteo no mide productividad.</p>
+  }
+  <p class="footnote">El historial comienza cuando se habilitó su registro; no se reconstruyen cambios anteriores.</p>
+  @if (copied()) { <p class="status" role="status">{{ copied() }}</p> }
+</section>

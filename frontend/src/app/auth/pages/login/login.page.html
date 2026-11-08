@@ -1,0 +1,51 @@
+<section class="auth-page login-page">
+  <mat-card class="auth-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Iniciar sesion</mat-card-title>
+      <mat-card-subtitle>Tu espacio de diseño en Órbita Studio.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput type="email" autocomplete="email" [formControl]="form.controls.email" />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <mat-error>Introduce un correo valido.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contrasena</mat-label>
+          <input matInput type="password" autocomplete="current-password" [formControl]="form.controls.password" />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <mat-error>La contrasena es obligatoria.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <button mat-flat-button class="cf-button-primary" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Ingresando...' : 'Iniciar sesion' }}
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <span>No tienes cuenta?</span>
+      <a mat-button class="cf-button-secondary" routerLink="/register">Crear cuenta</a>
+    </mat-card-actions>
+  </mat-card>
+
+  <div class="auth-copy">
+    <a class="back-link" routerLink="/">← Explorar Órbita Studio</a>
+    <p class="eyebrow">BIENVENIDO A TU ESTUDIO</p>
+    <h1>Las buenas ideas merecen un buen modelo.</h1>
+    <p>
+      Tus proyectos se guardan en tu cuenta para que puedas continuar el
+      modelado desde cualquier navegador conectado a tu espacio de trabajo.
+    </p>
+  </div>
+</section>

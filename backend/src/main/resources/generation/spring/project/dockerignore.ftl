@@ -1,0 +1,11 @@
+.git
+.gradle
+build
+data
+frontend
+mobile
+docs
+.env
+.env.*
+*.zip
+*.log

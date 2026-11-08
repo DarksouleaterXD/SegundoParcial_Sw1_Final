@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1">
+  <uml:Model xmi:type="uml:Model" xmi:id="EAID_00000000_0000_0000_0000_000000000001" name="Modelo de ventas">
+    <packagedElement xmi:type="uml:Package" xmi:id="EAPK_00000000_0000_0000_0000_000000000001" name="Modelo de ventas">
+      <packagedElement xmi:type="uml:PrimitiveType" xmi:id="EAJava_int" name="EAJava_int"/>
+      <packagedElement xmi:type="uml:Class" xmi:id="EAID_1A1A1A1A_1111_1111_1111_111111111111" name="Vendedor"/>
+      <packagedElement xmi:type="uml:Class" xmi:id="EAID_2B2B2B2B_2222_2222_2222_222222222222" name="Cliente"/>
+      <packagedElement xmi:type="uml:Class" xmi:id="EAID_548FD9D9_7676_4458_BE42_49C3365C40A0" name="Venta"/>
+      <packagedElement xmi:type="uml:Class" xmi:id="EAID_985ACF4B_0934_46c0_891D_4FDE899410CB" name="Producto"/>
+      <packagedElement xmi:type="uml:Association" xmi:id="EAID_AAAAAAAA_AAAA_AAAA_AAAA_AAAAAAAAAAAA" memberEnd="EAID_END_VENDEDOR EAID_END_VENTA_1">
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_VENDEDOR" type="EAID_1A1A1A1A_1111_1111_1111_111111111111"><lowerValue value="1"/><upperValue value="1"/></ownedEnd>
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_VENTA_1" type="EAID_548FD9D9_7676_4458_BE42_49C3365C40A0"><lowerValue value="0"/><upperValue value="*"/></ownedEnd>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="EAID_BBBBBBBB_BBBB_BBBB_BBBB_BBBBBBBBBBBB" memberEnd="EAID_END_CLIENTE EAID_END_VENTA_2">
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_CLIENTE" type="EAID_2B2B2B2B_2222_2222_2222_222222222222"><lowerValue value="1"/><upperValue value="1"/></ownedEnd>
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_VENTA_2" type="EAID_548FD9D9_7676_4458_BE42_49C3365C40A0"><lowerValue value="0"/><upperValue value="*"/></ownedEnd>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="EAID_CCCCCCCC_CCCC_CCCC_CCCC_CCCCCCCCCCCC" memberEnd="EAID_END_VENTA_3 EAID_END_PRODUCTO">
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_VENTA_3" type="EAID_548FD9D9_7676_4458_BE42_49C3365C40A0"><lowerValue value="1"/><upperValue value="*"/></ownedEnd>
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_END_PRODUCTO" type="EAID_985ACF4B_0934_46c0_891D_4FDE899410CB"><lowerValue value="0"/><upperValue value="*"/></ownedEnd>
+      </packagedElement>
+      <packagedElement xmi:type="uml:AssociationClass" xmi:id="EAID_751BA909_7783_4026_88C1_2FE8162ADC4D" name="Detalle" memberEnd="EAID_AC_END_VENTA EAID_AC_END_PRODUCTO">
+        <ownedAttribute xmi:type="uml:Property" xmi:id="EAID_ATTR_CANTIDAD" name="cantidad" type="EAJava_int" visibility="private"/>
+        <ownedAttribute xmi:type="uml:Property" xmi:id="EAID_ATTR_PRECUNIT" name="precUnit" type="EAJava_int" visibility="private"/>
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_AC_END_VENTA" type="EAID_548FD9D9_7676_4458_BE42_49C3365C40A0"><lowerValue value="1"/><upperValue value="*"/></ownedEnd>
+        <ownedEnd xmi:type="uml:Property" xmi:id="EAID_AC_END_PRODUCTO" type="EAID_985ACF4B_0934_46c0_891D_4FDE899410CB"><lowerValue value="0"/><upperValue value="*"/></ownedEnd>
+      </packagedElement>
+    </packagedElement>
+  </uml:Model>
+  <xmi:Extension extender="Enterprise Architect" extenderID="17.2">
+    <elements>
+      <element xmi:idref="EAID_751BA909_7783_4026_88C1_2FE8162ADC4D"><extendedProperties conID="EAID_9B07F664_BAE1_447d_AC7D_FA24193DC0FD"/></element>
+    </elements>
+    <connectors>
+      <connector xmi:idref="EAID_9B07F664_BAE1_447d_AC7D_FA24193DC0FD"><properties ea_type="Association" subtype="Class"/><extendedProperties associationclass="EAID_751BA909_7783_4026_88C1_2FE8162ADC4D"/></connector>
+    </connectors>
+  </xmi:Extension>
+</xmi:XMI>

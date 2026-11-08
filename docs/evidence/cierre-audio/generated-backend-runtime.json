@@ -1,0 +1,152 @@
+{
+  "checkedAt": "2026-11-05T03:27:18.367Z",
+  "javaVersion": 21,
+  "database": "H2 in-memory",
+  "cases": [
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "POST",
+      "path": "/api/producto",
+      "status": 400
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "POST",
+      "path": "/api/producto",
+      "status": 201
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "GET",
+      "path": "/api/producto/939866c8-2405-4a8b-92e3-48731b11aa31",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "GET",
+      "path": "/api/producto?size=10&page=0",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "GET",
+      "path": "/api/producto/count",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "PUT",
+      "path": "/api/producto/939866c8-2405-4a8b-92e3-48731b11aa31",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "DELETE",
+      "path": "/api/producto/939866c8-2405-4a8b-92e3-48731b11aa31",
+      "status": 204
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "GET",
+      "path": "/api/producto/939866c8-2405-4a8b-92e3-48731b11aa31",
+      "status": 404
+    },
+    {
+      "base": "http://127.0.0.1:8095",
+      "method": "GET",
+      "path": "/api/producto/count",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto",
+      "status": 403
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/auth/bootstrap",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/auth/bootstrap",
+      "status": 400
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 400
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/producto",
+      "status": 400
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "POST",
+      "path": "/api/producto",
+      "status": 201
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto/590df4e7-f32e-4b81-9357-7fe20fee6cf1",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto?size=10&page=0",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto/count",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "PUT",
+      "path": "/api/producto/590df4e7-f32e-4b81-9357-7fe20fee6cf1",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "DELETE",
+      "path": "/api/producto/590df4e7-f32e-4b81-9357-7fe20fee6cf1",
+      "status": 204
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto/590df4e7-f32e-4b81-9357-7fe20fee6cf1",
+      "status": 404
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/producto/count",
+      "status": 200
+    },
+    {
+      "base": "http://127.0.0.1:8096",
+      "method": "GET",
+      "path": "/api/usuario",
+      "status": 200
+    }
+  ],
+  "success": true
+}

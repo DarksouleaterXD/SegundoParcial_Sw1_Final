@@ -1,0 +1,12 @@
+.gradle/
+build/
+data/
+*.log
+.env
+.env.*
+!.env.example
+
+# This is production source code despite its package name. Keep it in the
+# Railway build context so the Spring generation module can compile.
+!src/main/java/com/classforge/generation/spring/generated/
+!src/main/java/com/classforge/generation/spring/generated/**
