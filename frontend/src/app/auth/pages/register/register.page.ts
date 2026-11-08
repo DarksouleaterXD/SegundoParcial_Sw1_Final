@@ -1,33 +1,15 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { DestroyScope,useService,signal,untilDestroyed } from '../../../core/view-state';
+import { FormControl,FormGroup,Validators } from '../../../core/forms';
+import { HttpErrorResponse } from '../../../core/api/http-client';
+import { Navigation } from '../../../core/navigation';
 import { finalize } from 'rxjs';
 
 import { AuthService } from '../../data/auth.service';
 
-@Component({
-  selector: 'app-register-page',
-  imports: [
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    RouterLink,
-  ],
-  templateUrl: './register.page.html',
-  styleUrl: '../shared-auth-page.scss',
-})
 export class RegisterPage {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = useService(AuthService);
+  private readonly router = useService(Navigation);
+  private readonly destroyRef = useService(DestroyScope);
 
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -65,7 +47,7 @@ export class RegisterPage {
       .register(this.form.getRawValue())
       .pipe(
         finalize(() => this.submitting.set(false)),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => void this.router.navigate(['/projects']),

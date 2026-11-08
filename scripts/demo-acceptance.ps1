@@ -37,7 +37,7 @@ try {
 Push-Location (Join-Path $root "frontend")
 try {
     Run "Frontend generation tests" { npm.cmd run test:generation }
-    Run "ClassForge Angular production build" { npm.cmd run build }
+    Run "ClassForge Astro production build" { npm.cmd run build }
 } finally { Pop-Location }
 
 Push-Location $root

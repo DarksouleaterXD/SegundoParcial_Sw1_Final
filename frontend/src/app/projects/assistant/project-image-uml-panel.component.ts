@@ -1,53 +1,33 @@
+import { effect,useService,signal } from '../../core/view-state';
+import { HttpErrorResponse } from '../../core/api/http-client';
 import {
-  HttpErrorResponse,
-} from '@angular/common/http';
-import {
-  Component,
-  effect,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
-import {
-  MatButtonModule,
-} from '@angular/material/button';
-import {
-  MatProgressSpinnerModule,
-} from '@angular/material/progress-spinner';
-import {
-  finalize,
-  Subscription,
+finalize,
+Subscription,
 } from 'rxjs';
 
 import {
-  ProjectWorkspaceStore,
+ProjectWorkspaceStore,
 } from '../state/project-workspace.store';
 import {
-  AssistantApiService,
+AssistantApiService,
 } from './assistant-api.service';
 import {
-  AssistantImagePreparationService,
+AssistantImagePreparationService,
 } from './assistant-image-preparation.service';
 import {
-  AssistantImagePlanResponse,
-  AssistantRuntimeHealthResponse,
+AssistantImagePlanResponse,
+AssistantRuntimeHealthResponse,
 } from './assistant-model';
 
-@Component({
-  selector: 'app-project-image-uml-panel',
-  imports: [MatButtonModule, MatProgressSpinnerModule],
-  templateUrl: './project-image-uml-panel.component.html',
-  styleUrl: './project-image-uml-panel.component.scss',
-})
 export class ProjectImageUmlPanelComponent
-  implements OnDestroy {
-  private readonly api = inject(AssistantApiService);
-  private readonly imagePreparation = inject(AssistantImagePreparationService);
+   {
+  private readonly api = useService(AssistantApiService);
+  private readonly imagePreparation = useService(AssistantImagePreparationService);
   private healthProjectId: string | null = null;
   private originalImageFile: File | null = null;
   private imageRequest: Subscription | null = null;
 
-  readonly store = inject(ProjectWorkspaceStore);
+  readonly store = useService(ProjectWorkspaceStore);
   readonly selectedImage = signal<File | null>(null);
   readonly imagePreviewUrl = signal<string | null>(null);
   readonly imagePlanning = signal(false);
@@ -203,7 +183,7 @@ export class ProjectImageUmlPanelComponent
     this.clearSelectedImage();
   }
 
-  ngOnDestroy(): void {
+  dispose(): void {
     this.imageRequest?.unsubscribe();
     this.clearSelectedImage();
   }

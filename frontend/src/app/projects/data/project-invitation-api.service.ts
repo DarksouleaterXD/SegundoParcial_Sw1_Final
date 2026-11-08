@@ -1,17 +1,14 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { useService } from '../../core/view-state';
+import { HttpClient } from '../../core/api/http-client';
 import { Observable } from 'rxjs';
 
 import {
-  ProjectCollaborators,
-  ProjectInvitation,
+ProjectCollaborators,
+ProjectInvitation,
 } from '../model/project-invitation';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class ProjectInvitationApiService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
 
   pending(): Observable<ProjectInvitation[]> {
     return this.http.get<ProjectInvitation[]>(

@@ -36,7 +36,7 @@ try {
     if (-not $SkipTests) {
         Invoke-Checked "Frontend characterization tests" { npm run test:characterization }
     }
-    Invoke-Checked "Angular production build" { npm run build }
+    Invoke-Checked "Astro production build" { npm run build }
 } finally { Pop-Location }
 
 $Jar = Get-ChildItem (Join-Path $Root "backend\build\libs\*.jar") |
@@ -46,14 +46,11 @@ $Jar = Get-ChildItem (Join-Path $Root "backend\build\libs\*.jar") |
 if (-not $Jar) { throw "No Spring Boot jar found under backend/build/libs." }
 Copy-Item $Jar.FullName (Join-Path $Stage "classforge.jar")
 
-$Browser = Join-Path $Root "frontend\dist\classforge-frontend\browser"
-if (-not (Test-Path $Browser)) {
-    $Browser = Join-Path $Root "frontend\dist\classforge-frontend"
+$FrontendOutput = Join-Path $Root "frontend\dist"
+if (-not (Test-Path (Join-Path $FrontendOutput "workspace\index.html"))) {
+    throw "Astro output not found under frontend/dist."
 }
-if (-not (Test-Path (Join-Path $Browser "index.html"))) {
-    throw "Angular browser output not found under frontend/dist/classforge-frontend."
-}
-Copy-Item $Browser (Join-Path $Stage "frontend") -Recurse
+Copy-Item $FrontendOutput (Join-Path $Stage "frontend") -Recurse
 
 Copy-Item (Join-Path $Root "deploy\aws\nginx") $Stage -Recurse
 Copy-Item (Join-Path $Root "deploy\aws\systemd") $Stage -Recurse

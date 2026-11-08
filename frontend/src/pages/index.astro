@@ -1,0 +1,35 @@
+---
+import StudioLayout from '../layouts/StudioLayout.astro';
+import '../app/landing/landing.page.scss';
+---
+<StudioLayout>
+  <section class="studio-home">
+    <header class="home-caption"><span>ÓRBITA STUDIO</span><span>MODELADO · COLABORACIÓN · GENERACIÓN</span></header>
+    <div class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">DE LA IDEA AL SISTEMA</p>
+        <h1>Dale forma.<br /><em>Hazlo funcionar.</em></h1>
+        <p class="lead">Diseña tu modelo de clases, trabaja con tu equipo y conviértelo en una aplicación que puedes ejecutar.</p>
+        <div class="hero-actions">
+          <a class="studio-button-base studio-unelevated-button cf-button-primary" href="/projects">Abrir mis proyectos <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
+          <a class="studio-button-base cf-button-secondary" href="/guide">Cómo funciona</a>
+        </div>
+        <p class="hero-note">Un modelo. Herramientas conectadas. Código que te pertenece.</p>
+      </div>
+      <div class="model-preview" aria-label="Ejemplo visual de un modelo conectado a una aplicación">
+        <div class="preview-title"><span class="preview-dot"></span> DEL DIAGRAMA AL CÓDIGO <span>01 / 03</span></div>
+        <div class="example-class"><small>CLASE</small><strong>Producto</strong><div>id: UUID<br />nombre: String<br />precio: Decimal</div></div>
+        <div class="preview-connector" aria-hidden="true">↓</div>
+        <div class="output-card"><span class="material-symbols-rounded" aria-hidden="true">deployed_code</span><div><strong>Tu aplicación</strong><small>API REST · Web · Android</small></div><span class="output-badge">ZIP</span></div>
+        <div class="preview-footer"><span>Spring Boot</span><span>Angular</span><span>Flutter</span></div>
+      </div>
+    </div>
+    <div class="section-heading"><h2>Tu siguiente paso</h2><span>Todo comienza con un proyecto</span></div>
+    <div class="capability-grid">
+      <a href="/projects" class="feature-card"><span class="feature-number">01</span><span class="material-symbols-rounded" aria-hidden="true">schema</span><h3>Modelar y colaborar</h3><p>Clases, relaciones, atributos y clases de asociación. Invita a tu equipo y comparte el mismo diagrama.</p><strong>Ir al espacio de trabajo ↗</strong></a>
+      <a href="/guide#generated" class="feature-card"><span class="feature-number">02</span><span class="material-symbols-rounded" aria-hidden="true">terminal</span><h3>Generar y ejecutar</h3><p>Descarga una API CRUD y sus clientes. Consulta las herramientas necesarias y prueba sus endpoints.</p><strong>Leer la guía del backend ↗</strong></a>
+      <a href="/guide#assistant" class="feature-card"><span class="feature-number">03</span><span class="material-symbols-rounded" aria-hidden="true">auto_awesome</span><h3>Modelar con asistencia</h3><p>Solicita cambios por texto, voz o imagen. Revisa la propuesta antes de aplicarla; requiere un proveedor de IA disponible.</p><strong>Configurar los asistentes ↗</strong></a>
+    </div>
+    <footer class="home-footer"><span>Importa tus modelos XMI de Enterprise Architect.</span><a href="/guide#deploy">Consulta cómo desplegar en Railway →</a></footer>
+  </section>
+</StudioLayout>

@@ -1,29 +1,23 @@
 import {
-  Injectable,
-} from '@angular/core';
-import {
-  Client,
-  IMessage,
+Client,
+IMessage,
 } from '@stomp/stompjs';
 import {
-  Subject,
+Subject,
 } from 'rxjs';
 
 import {
-  CollaborationConnectionEvent,
-  ProjectOperation,
-  ProjectOperationApplied,
-  ProjectOperationRejected,
+CollaborationConnectionEvent,
+ProjectOperation,
+ProjectOperationApplied,
+ProjectOperationRejected,
 } from './collaboration-protocol';
 import {
-  PresenceEventRequest,
-  ProjectPresenceEvent,
-  ProjectPresenceSnapshot,
+PresenceEventRequest,
+ProjectPresenceEvent,
+ProjectPresenceSnapshot,
 } from '../presence/presence-protocol';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class ProjectCollaborationService {
   readonly clientId =
     crypto.randomUUID();

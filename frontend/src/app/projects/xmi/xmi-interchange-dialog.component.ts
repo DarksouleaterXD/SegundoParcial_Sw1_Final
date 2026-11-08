@@ -1,16 +1,11 @@
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { useService,signal,DIALOG_DATA,DIALOG_HANDLE } from '../../core/view-state';
+import { HttpErrorResponse,HttpResponse } from '../../core/api/http-client';
+import { DialogHandle } from '../../core/dialogs';
 import { finalize } from 'rxjs';
 
 import {
-  XmiImportPreview,
-  XmiInterchangeApiService,
+XmiImportPreview,
+XmiInterchangeApiService,
 } from './xmi-interchange-api.service';
 
 export interface XmiInterchangeDialogData {
@@ -18,125 +13,10 @@ export interface XmiInterchangeDialogData {
   projectName: string;
 }
 
-@Component({
-  selector: 'app-xmi-interchange-dialog',
-  imports: [MatButtonModule, MatDialogModule],
-  template: `
-    <h2 mat-dialog-title>Enterprise Architect · XMI 2.1</h2>
-
-    <mat-dialog-content>
-      <p class="copy">
-        Importa o exporta el subconjunto UML de NexaUML: clases, atributos,
-        tipos, asociaciones, agregaciones, composiciones, generalizaciones y
-        multiplicidades. Los paquetes XMI se aplanan al modelo canonico.
-      </p>
-
-      <section class="xmi-section">
-        <div>
-          <strong>Importar desde Enterprise Architect</strong>
-          <p>El archivo se analiza y valida primero. El proyecto no cambia hasta que confirmes el preview.</p>
-        </div>
-
-        <label class="file-picker">
-          <span class="material-symbols-rounded" aria-hidden="true">upload_file</span>
-          <span>{{ selectedFile()?.name ?? 'Seleccionar .xmi o .xml' }}</span>
-          <input
-            type="file"
-            accept=".xmi,.xml,application/xml,text/xml"
-            [disabled]="busy()"
-            (change)="fileSelected($event)"
-          />
-        </label>
-
-        <button
-          mat-stroked-button
-          type="button"
-          [disabled]="!selectedFile() || busy()"
-          (click)="previewImport()"
-        >
-          {{ previewing() ? 'Analizando...' : 'Analizar XMI' }}
-        </button>
-      </section>
-
-      @if (preview(); as currentPreview) {
-        <section class="preview" aria-live="polite">
-          <strong>Preview listo</strong>
-          <div class="metrics">
-            <span>{{ currentPreview.classCount }} clases</span>
-            <span>{{ currentPreview.associationClassCount }} clases de asociación</span>
-            <span>{{ currentPreview.attributeCount }} atributos</span>
-            <span>{{ currentPreview.relationshipCount }} relaciones</span>
-            <span>{{ currentPreview.packageCount }} paquetes</span>
-          </div>
-
-          @if (currentPreview.diagnostics.length > 0) {
-            <ul>
-              @for (diagnostic of currentPreview.diagnostics; track diagnostic.code + diagnostic.message) {
-                <li>
-                  <strong>{{ diagnostic.severity }}</strong>
-                  {{ diagnostic.message }}
-                </li>
-              }
-            </ul>
-          }
-
-          <button
-            mat-flat-button
-            class="cf-button-primary"
-            type="button"
-            [disabled]="busy()"
-            (click)="applyImport()"
-          >
-            {{ applying() ? 'Aplicando...' : 'Reemplazar UML con este XMI' }}
-          </button>
-        </section>
-      }
-
-      <section class="xmi-section export-section">
-        <div>
-          <strong>Exportar para Enterprise Architect</strong>
-          <p>Genera XMI 2.1 determinista usando el modelo guardado actualmente.</p>
-        </div>
-        <button
-          mat-stroked-button
-          type="button"
-          [disabled]="busy()"
-          (click)="exportXmi()"
-        >
-          {{ exporting() ? 'Exportando...' : 'Descargar XMI 2.1' }}
-        </button>
-      </section>
-
-      @if (message()) {
-        <div class="message" [class.error]="error()" role="status">
-          {{ message() }}
-        </div>
-      }
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" [disabled]="busy()" (click)="dialogRef.close()">
-        Cerrar
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: `
-    mat-dialog-content { width: min(680px, 86vw); display: grid; gap: 1rem; }
-    .copy, .xmi-section p { color: var(--cf-muted); line-height: 1.5; margin: .35rem 0 0; }
-    .xmi-section, .preview { border: 1px solid var(--cf-border); border-radius: 14px; padding: 1rem; display: grid; gap: .85rem; }
-    .file-picker { border: 1px dashed var(--cf-border); border-radius: 12px; padding: .8rem; display: flex; align-items: center; gap: .55rem; cursor: pointer; }
-    .file-picker input { display: none; }
-    .metrics { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .metrics span { background: var(--cf-secondary-bg); border-radius: 999px; padding: .35rem .65rem; }
-    ul { margin: 0; padding-left: 1.2rem; color: var(--cf-muted); }
-    .message { border-radius: 10px; padding: .75rem; background: var(--cf-secondary-bg); }
-    .message.error { color: #b42318; }
-  `,
-})
 export class XmiInterchangeDialogComponent {
-  readonly data = inject<XmiInterchangeDialogData>(MAT_DIALOG_DATA);
-  readonly dialogRef = inject(MatDialogRef<XmiInterchangeDialogComponent>);
-  private readonly api = inject(XmiInterchangeApiService);
+  readonly data = useService<XmiInterchangeDialogData>(DIALOG_DATA);
+  readonly dialogRef = useService<DialogHandle<XmiInterchangeDialogComponent>>(DIALOG_HANDLE);
+  private readonly api = useService(XmiInterchangeApiService);
 
   readonly selectedFile = signal<File | null>(null);
   readonly preview = signal<XmiImportPreview | null>(null);

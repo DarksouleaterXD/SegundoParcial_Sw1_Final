@@ -1,11 +1,7 @@
-import { DatePipe } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, computed, effect, inject, input, model, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
-import { EMPTY, catchError, exhaustMap, timer } from 'rxjs';
+import { DestroyScope,computed,effect,useService,signal,untilDestroyed,viewProp,viewModel } from '../../core/view-state';
+import { HttpClient,HttpErrorResponse } from '../../core/api/http-client';
+import { EMPTY,catchError,exhaustMap,timer } from 'rxjs';
 import { AuthService } from '../../auth/data/auth.service';
-import { ProjectActivitySummaryComponent } from './project-activity-summary.component';
 
 interface Entry {
   id: number; actorId: string; actorName: string; body: string;
@@ -15,18 +11,12 @@ interface History { entries: Entry[]; nextBefore: number | null; }
 
 export type ProjectTeamTab = 'CHAT' | 'ACTIVITY' | 'SUMMARY';
 
-@Component({
-  selector: 'app-project-team-panel',
-  imports: [DatePipe, FormsModule, ProjectActivitySummaryComponent],
-  templateUrl: './project-team-panel.component.html',
-  styleUrl: './project-team-panel.component.scss',
-})
 export class ProjectTeamPanelComponent {
-  readonly projectId = input.required<string>();
-  private readonly http = inject(HttpClient);
-  private readonly destroyRef = inject(DestroyRef);
-  readonly auth = inject(AuthService);
-  readonly tab = model<ProjectTeamTab>('CHAT');
+  readonly projectId = viewProp<string>('projectId');
+  private readonly http = useService(HttpClient);
+  private readonly destroyRef = useService(DestroyScope);
+  readonly auth = useService(AuthService);
+  readonly tab = viewModel<ProjectTeamTab>('tab', 'CHAT');
   readonly entries = signal<Entry[]>([]);
   readonly nextBefore = signal<number | null>(null);
   readonly error = signal('');
@@ -70,7 +60,7 @@ export class ProjectTeamPanelComponent {
     const kind = this.tab(), projectId = this.projectId();
     this.loadingOlder.set(true);
     this.http.get<History>(this.url(projectId), { params: {kind, before} })
-      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      .pipe(untilDestroyed(this.destroyRef)).subscribe({
         next: page => {
           if (kind === this.tab() && projectId === this.projectId()) {
             this.merge(page.entries); this.nextBefore.set(page.nextBefore); this.error.set('');
@@ -84,7 +74,7 @@ export class ProjectTeamPanelComponent {
     const body = this.draft.trim(); if (!body || body.length > 2000 || this.sending()) return;
     const projectId = this.projectId();
     this.sending.set(true); this.sendError.set('');
-    this.http.post<Entry>(this.url(projectId), { body }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.http.post<Entry>(this.url(projectId), { body }).pipe(untilDestroyed(this.destroyRef)).subscribe({
       next: entry => {
         if (projectId === this.projectId()) {
           if (this.tab() === 'CHAT') this.merge([entry]);

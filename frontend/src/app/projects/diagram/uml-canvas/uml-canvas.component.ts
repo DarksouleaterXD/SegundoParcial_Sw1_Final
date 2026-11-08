@@ -1,37 +1,23 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  OnChanges,
-  OnDestroy,
-  Output,
-  SimpleChanges,
-  ViewChild,
-  signal,
-} from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { signal,viewEvent,viewElement } from '../../../core/view-state';
 import { dia } from '@joint/core';
 
 import {
-  DiagramNodeLayout,
-  ProjectDocument,
+DiagramNodeLayout,
+ProjectDocument,
 } from '../../model/project';
 import {
-  PresenceParticipant,
+PresenceParticipant,
 } from '../../presence/presence-protocol';
 import {
-  classForgeCellNamespace,
-  createUmlClassCell,
-  createUmlAssociationClassCell,
+classForgeCellNamespace,
+createUmlClassCell,
+createUmlAssociationClassCell,
 } from '../uml-class-shape';
 import {
-  createUmlRelationshipCell,
-  createAssociationClassConnector,
-  resetRelationshipCell,
-  selectRelationshipCell,
+createUmlRelationshipCell,
+createAssociationClassConnector,
+resetRelationshipCell,
+selectRelationshipCell,
 } from '../uml-relationship-shape';
 
 export interface UmlClassMovedEvent {
@@ -60,79 +46,71 @@ export type UmlCanvasSelection =
     }
   | null;
 
-@Component({
-  selector: 'app-uml-canvas',
-  imports: [MatButtonModule],
-  templateUrl: './uml-canvas.component.html',
-  styleUrl: './uml-canvas.component.scss',
-})
 export class UmlCanvasComponent
-  implements AfterViewInit, OnChanges, OnDestroy
+
 {
-  @Input({ required: true })
+
   document: ProjectDocument | null = null;
 
-  @Input()
+
   requestedSelection: UmlCanvasSelection = null;
 
-  @Input()
+
   validating = false;
 
-  @Input()
+
   remoteParticipants:
     PresenceParticipant[] = [];
 
-  @Input()
+
   canUndo = false;
 
-  @Input()
+
   canRedo = false;
 
-  @Output()
+
   readonly createClassRequested =
-    new EventEmitter<void>();
+    viewEvent<void>('createClassRequested');
 
-  @Output()
+
   readonly validateRequested =
-    new EventEmitter<void>();
+    viewEvent<void>('validateRequested');
 
-  @Output()
+
   readonly undoRequested =
-    new EventEmitter<void>();
+    viewEvent<void>('undoRequested');
 
-  @Output()
+
   readonly redoRequested =
-    new EventEmitter<void>();
+    viewEvent<void>('redoRequested');
 
-  @Output()
+
   readonly editClassRequested =
-    new EventEmitter<string>();
+    viewEvent<string>('editClassRequested');
 
-  @Output()
+
   readonly editRelationshipRequested =
-    new EventEmitter<string>();
+    viewEvent<string>('editRelationshipRequested');
 
-  @Output()
+
   readonly relationshipRequested =
-    new EventEmitter<UmlRelationshipEndpoints>();
+    viewEvent<UmlRelationshipEndpoints>('relationshipRequested');
 
-  @Output()
+
   readonly selectionChanged =
-    new EventEmitter<UmlCanvasSelection>();
+    viewEvent<UmlCanvasSelection>('selectionChanged');
 
-  @Output()
+
   readonly classMoved =
-    new EventEmitter<UmlClassMovedEvent>();
+    viewEvent<UmlClassMovedEvent>('classMoved');
 
-  @Output()
+
   readonly cursorMoved =
-    new EventEmitter<UmlCanvasCursorEvent>();
+    viewEvent<UmlCanvasCursorEvent>('cursorMoved');
 
-  @ViewChild('paperHost', { static: true })
-  private readonly paperHost!: ElementRef<HTMLDivElement>;
+  private readonly paperHost = viewElement<HTMLDivElement>('paperHost');
 
-  @ViewChild('viewport', { static: true })
-  private readonly viewport!: ElementRef<HTMLDivElement>;
+  private readonly viewport = viewElement<HTMLDivElement>('viewport');
 
   readonly zoomPercent = signal(100);
   readonly relationshipMode = signal(false);
@@ -213,10 +191,7 @@ export class UmlCanvasComponent
     );
   };
 
-  @HostListener(
-    'window:keydown',
-    ['$event'],
-  )
+
   handleHistoryShortcut(
     event: KeyboardEvent,
   ): void {
@@ -263,7 +238,7 @@ export class UmlCanvasComponent
       this.redoRequested.emit();
     }
   }
-  ngAfterViewInit(): void {
+  mount(): void {
     this.paper = new dia.Paper({
       el: this.paperHost.nativeElement,
       model: this.graph,
@@ -304,8 +279,8 @@ export class UmlCanvasComponent
     this.syncGraph(true);
   }
 
-  ngOnChanges(
-    changes: SimpleChanges,
+  updateInputs(
+    changes: Record<string, unknown>,
   ): void {
     if (!this.initialized) {
       return;
@@ -322,7 +297,7 @@ export class UmlCanvasComponent
     }
   }
 
-  ngOnDestroy(): void {
+  dispose(): void {
     this.viewport.nativeElement
       .removeEventListener(
         'wheel',

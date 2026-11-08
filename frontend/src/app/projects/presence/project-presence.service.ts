@@ -1,42 +1,30 @@
+import { DestroyScope,computed,useService,signal,untilDestroyed } from '../../core/view-state';
 import {
-  DestroyRef,
-  Injectable,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import {
-  takeUntilDestroyed,
-} from '@angular/core/rxjs-interop';
-import {
-  Subject,
-  auditTime,
+Subject,
+auditTime,
 } from 'rxjs';
 
 import {
-  ProjectCollaborationService,
+ProjectCollaborationService,
 } from '../collaboration/project-collaboration.service';
 import {
-  UmlCanvasCursorEvent,
-  UmlCanvasSelection,
+UmlCanvasCursorEvent,
+UmlCanvasSelection,
 } from '../diagram/uml-canvas/uml-canvas.component';
 import {
-  PresenceEventRequest,
-  PresenceParticipant,
-  PresenceSelection,
-  ProjectPresenceEvent,
-  ProjectPresenceSnapshot,
+PresenceEventRequest,
+PresenceParticipant,
+PresenceSelection,
+ProjectPresenceEvent,
+ProjectPresenceSnapshot,
 } from './presence-protocol';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class ProjectPresenceService {
   private readonly collaboration =
-    inject(ProjectCollaborationService);
+    useService(ProjectCollaborationService);
 
   private readonly destroyRef =
-    inject(DestroyRef);
+    useService(DestroyScope);
 
   private readonly projectIdState =
     signal<string | null>(null);
@@ -75,7 +63,7 @@ export class ProjectPresenceService {
     this.collaboration
       .connectionEvents$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )
@@ -100,7 +88,7 @@ export class ProjectPresenceService {
     this.collaboration
       .presenceSnapshots$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )
@@ -114,7 +102,7 @@ export class ProjectPresenceService {
     this.collaboration
       .presenceEvents$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )
@@ -128,7 +116,7 @@ export class ProjectPresenceService {
     this.cursorInput
       .pipe(
         auditTime(67),
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )

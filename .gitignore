@@ -6,9 +6,10 @@ out/
 # VS Code
 .vscode/
 
-# Angular / Node
+# Frontend / Node
 frontend/node_modules/
 frontend/dist/
+frontend/.astro/
 frontend/.angular/
 frontend/.cache/
 npm-debug.log*

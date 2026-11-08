@@ -1,21 +1,18 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { useService } from '../../core/view-state';
+import { HttpClient } from '../../core/api/http-client';
 import { Observable } from 'rxjs';
 
 import {
-  CreateProjectRequest,
-  Project,
-  ProjectValidationResult,
-  SaveProjectDocumentRequest,
-  UpdateProjectRequest,
-  ValidateProjectDocumentRequest,
+CreateProjectRequest,
+Project,
+ProjectValidationResult,
+SaveProjectDocumentRequest,
+UpdateProjectRequest,
+ValidateProjectDocumentRequest,
 } from '../model/project';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class ProjectApiService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
   private readonly baseUrl = '/api/projects';
 
   list(): Observable<Project[]> {

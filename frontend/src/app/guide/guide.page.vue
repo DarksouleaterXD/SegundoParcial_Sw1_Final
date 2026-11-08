@@ -1,0 +1,570 @@
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { GuidePage } from './guide.page';
+import { setupView } from '../core/view-state';
+
+export default defineComponent({
+  name: 'GuidePageView',
+
+  setup(props, { emit }) {
+    return {
+      ...setupView(GuidePage, props, emit),
+    };
+  },
+});
+</script>
+
+<template>
+  <app-guide-page class="studio-view">
+    <section class="guide-shell">
+      <header class="guide-heading">
+        <p class="eyebrow">DOCUMENTACIÓN / PRIMEROS PASOS</p>
+        <h1>Del diagrama a tu aplicación.</h1>
+        <p>Qué hace cada backend, qué necesitas instalar y cómo ponerlo en marcha.</p>
+      </header>
+      <nav aria-label="Contenido de la guía" class="guide-nav">
+        <a fragment="overview" :href="'/guide#overview'">Qué hace</a>
+        <a fragment="local" :href="'/guide#local'">Iniciar Órbita</a>
+        <a fragment="generated" :href="'/guide#generated'">Ejecutar el ZIP</a>
+        <a fragment="deploy" :href="'/guide#deploy'">Railway</a>
+        <a fragment="assistant" :href="'/guide#assistant'">IA</a>
+        <a fragment="troubleshooting" :href="'/guide#troubleshooting'">Ayuda</a>
+      </nav>
+      <p role="status" class="copy-message">{{ copyMessage() }}</p>
+      <section id="overview" class="guide-section">
+        <span class="step">01 / ENTENDER</span>
+        <h2>Dos backends, dos responsabilidades</h2>
+        <div class="explanation-grid">
+          <article>
+            <span aria-hidden="true" class="material-symbols-rounded">hub</span>
+            <h3>El backend de Órbita / ClassForge</h3>
+            <p>
+              Es el servidor que permite usar esta plataforma: autentica usuarios, guarda proyectos, valida el
+              modelo UML y sincroniza las acciones de colaboradores.
+            </p>
+            <p>
+              También importa y exporta XMI, consulta los proveedores de IA y genera archivos descargables. El
+              nombre técnico del proyecto sigue siendo ClassForge.
+            </p>
+            <small>Java 21 · Spring Boot · JPA · WebSocket</small>
+          </article>
+          <article>
+            <span aria-hidden="true" class="material-symbols-rounded">deployed_code</span>
+            <h3>El backend que descargas</h3>
+            <p>
+              Es un proyecto independiente creado a partir de tus clases y relaciones. Incluye entidades,
+              repositorios, servicios y endpoints CRUD para los datos de tu aplicación.
+            </p>
+            <p>
+              El modo con autenticación añade login y JWT. El ZIP incluye documentación OpenAPI, colección
+              Postman y clientes Angular y Flutter. Necesita ejecutarse por separado.
+            </p>
+            <small>Tu modelo → proyecto Spring Boot → API REST</small>
+          </article>
+        </div>
+        <h3>Funciones disponibles en la plataforma</h3>
+        <ul class="capability-list">
+          <li>
+            <strong>Cuenta y acceso</strong>
+            Registro, login y proyectos propios o compartidos.
+          </li>
+          <li>
+            <strong>Modelado</strong>
+            Clases, atributos, métodos, relaciones, multiplicidades y clases de asociación. Los métodos
+            documentan operaciones con parámetros y retorno; no generan lógica de negocio.
+          </li>
+          <li>
+            <strong>Trabajo en equipo</strong>
+            Invitaciones por correo, presencia, sincronización de operaciones, chat compartido e historial de
+            actividad.
+          </li>
+          <li>
+            <strong>Control del modelo</strong>
+            Guardado, revisiones, deshacer/rehacer y validación con observaciones.
+          </li>
+          <li>
+            <strong>Intercambio</strong>
+            Vista previa de importación y exportación XMI para Enterprise Architect.
+          </li>
+          <li>
+            <strong>Generación</strong>
+            ZIP con API CRUD simple o autenticada y aplicaciones cliente.
+          </li>
+          <li>
+            <strong>Asistencia</strong>
+            Texto, voz e imagen con revisión previa de los cambios. Requiere servicios de IA configurados.
+          </li>
+        </ul>
+        <div class="notice">
+          La conversación del equipo y la actividad se guardan en la base de datos del servidor y se
+          actualizan cada 4 segundos. Solo los miembros del proyecto pueden consultarlas. La actividad empieza
+          a registrarse desde esta versión. El modo Consultar usa el modelo guardado y permite incluir hasta
+          20 mensajes recientes del equipo, con un máximo de 600 caracteres por mensaje. Tus preguntas y
+          respuestas exitosas se guardan de forma privada por usuario y proyecto; puedes recuperar y borrar el
+          historial. La IA recibe hasta 10 intercambios anteriores, con respuestas limitadas a 2000
+          caracteres. Las propuestas de cambio no forman parte de esa memoria. La pestaña Resumen calcula
+          operaciones por período e integrante, sin IA, con hasta 90 días por consulta. Los resúmenes se
+          actualizan al solicitarlos.
+        </div>
+      </section>
+      <section id="local" class="guide-section">
+        <span class="step">02 / DESARROLLO LOCAL</span>
+        <h2>Iniciar la plataforma</h2>
+        <p>
+          Estas instrucciones son para PowerShell en Windows. Abre las terminales desde la raíz del
+          repositorio ClassForge.
+        </p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Herramienta</th>
+                <th>Para qué se necesita</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    href="https://adoptium.net/temurin/releases/?version=21"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    JDK 21
+                  </a>
+                </td>
+                <td>
+                  Compilar y ejecutar Java. Instala el JDK, configura JAVA_HOME y abre una terminal nueva.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">
+                    Node.js y npm
+                  </a>
+                </td>
+                <td>
+                  Ejecutar Astro. La imagen del proyecto usa Node 22.22.3; también puedes usar una versión
+                  compatible de Node 24, desde 24.15.0.
+                </td>
+              </tr>
+              <tr>
+                <td>Gradle Wrapper</td>
+                <td>
+                  Ya está incluido como gradlew.bat. No necesitas instalar Gradle por separado. La primera
+                  ejecución descarga dependencias.
+                </td>
+              </tr>
+              <tr>
+                <td>Postman o un cliente HTTP</td>
+                <td>Opcional para demostrar y comprobar endpoints.</td>
+              </tr>
+              <tr>
+                <td>PostgreSQL</td>
+                <td>
+                  Para persistencia al desplegar. En local, la plataforma tiene H2 en archivo de forma
+                  predeterminada.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="command-header">
+          <h3>Comprueba tus herramientas</h3>
+          <button type="button" @click="copy(commands.versions)" class="studio-button-base studio-button">
+            Copiar
+          </button>
+        </div>
+        >
+        <pre><code v-text="commands.versions"></code></pre>
+        <div class="explanation-grid">
+          <article>
+            <div class="command-header">
+              <h3>Terminal 1 · API</h3>
+              <button
+                type="button"
+                @click="copy(commands.platformApi)"
+                class="studio-button-base studio-button"
+              >
+                Copiar
+              </button>
+            </div>
+            >
+            <pre><code v-text="commands.platformApi"></code></pre>
+            <p>
+              Por defecto escucha en
+              <code>http://localhost:8082</code>
+              . Comprueba
+              <a href="http://localhost:8082/api/health" target="_blank" rel="noopener noreferrer">
+                /api/health
+              </a>
+              .
+            </p>
+          </article>
+          <article>
+            <div class="command-header">
+              <h3>Terminal 2 · Frontend</h3>
+              <button
+                type="button"
+                @click="copy(commands.platformWeb)"
+                class="studio-button-base studio-button"
+              >
+                Copiar
+              </button>
+            </div>
+            >
+            <pre><code v-text="commands.platformWeb"></code></pre>
+            <p>
+              Abre
+              <a href="http://localhost:4200" target="_blank" rel="noopener noreferrer">localhost:4200</a>
+              . Su proxy envía
+              <code>/api</code>
+              y
+              <code>/ws</code>
+              al backend en 8082.
+            </p>
+          </article>
+        </div>
+        <p>
+          En macOS/Linux utiliza
+          <code>./gradlew</code>
+          . Las funciones de proyectos, UML y XMI no necesitan iniciar los modelos de IA.
+        </p>
+      </section>
+      <section id="generated" class="guide-section">
+        <span class="step">03 / TU APLICACIÓN GENERADA</span>
+        <h2>Descargar, iniciar y demostrar el backend</h2>
+        <ol class="steps">
+          <li>
+            Entra a un proyecto y crea o importa tu diagrama. Marca los identificadores de las clases y valida
+            el modelo.
+          </li>
+          <li>
+            Espera la sincronización y pulsa
+            <strong>Descargar backend</strong>
+            . Elige nombre, paquete Java y modo CRUD simple o autenticado.
+          </li>
+          <li>
+            Extrae el ZIP. Abre PowerShell en la carpeta que contiene
+            <code>build.gradle</code>
+            y
+            <code>gradlew.bat</code>
+            .
+          </li>
+          <li>
+            Ejecuta el comando y espera el mensaje
+            <code>Started …Application</code>
+            .
+          </li>
+        </ol>
+        <div class="command-header">
+          <h3>Arrancar el proyecto exportado</h3>
+          <button type="button" @click="copy(commands.generated)" class="studio-button-base studio-button">
+            Copiar
+          </button>
+        </div>
+        >
+        <pre><code v-text="commands.generated"></code></pre>
+        <p>
+          La API utiliza
+          <code>http://localhost:8080</code>
+          por defecto.
+          <code>bootRun</code>
+          permanece ejecutándose mientras el servidor está encendido; el porcentaje de Gradle no tiene que
+          llegar a 100 %. Detén el servidor con Ctrl+C.
+        </p>
+        <h3>Probar los endpoints reales</h3>
+        <ol class="steps">
+          <li>
+            Importa
+            <code>postman_collection.json</code>
+            en Postman y revisa la URL base de la colección para que apunte a tu servidor local.
+          </li>
+          <li>
+            Utiliza los nombres de rutas y cuerpos que aparecen en la colección o en
+            <code>openapi.yaml</code>
+            . Se derivan del modelo; no supongas que el nombre de la clase se pluraliza automáticamente.
+          </li>
+          <li>
+            Ejecuta crear → listar → obtener → actualizar → contar → eliminar. Comprueba la respuesta de cada
+            operación.
+          </li>
+          <li>
+            Si elegiste autenticación, crea la primera cuenta con
+            <code>POST /api/auth/bootstrap</code>
+            , usando el cuerpo indicado en la colección. Después inicia sesión con
+            <code>POST /api/auth/login</code>
+            y envía el JWT como Bearer Token.
+          </li>
+        </ol>
+        <p>
+          Las claves compuestas utilizan
+          <code>/by-id</code>
+          con parámetros. Las relaciones se envían mediante identificadores; crea primero los registros
+          referenciados.
+        </p>
+        <div class="notice warning">
+          <strong>Datos de demostración:</strong>
+          el ZIP usa H2 en memoria y
+          <code>ddl-auto: create-drop</code>
+          . Esos registros desaparecen al reiniciar. Las nuevas exportaciones usan
+          <code>update</code>
+          en el perfil PostgreSQL para conservar datos; los ZIP anteriores deben revisarse. Antes de
+          producción prepara migraciones y copias de seguridad.
+        </div>
+        <details>
+          <summary>Usar PostgreSQL local con persistencia</summary>
+          <p>
+            Crea antes la base y el usuario. Sustituye los valores de ejemplo.
+            <code>update</code>
+            permite una demostración persistente; para producción con cambios de esquema controlados, prepara
+            migraciones y usa una política acorde.
+          </p>
+          >
+          <pre><code v-text="commands.postgres"></code></pre>
+        </details>
+        <details>
+          <summary>Ejecutar los clientes incluidos en el ZIP</summary>
+          <p>
+            En
+            <code>frontend/</code>
+            ejecuta
+            <code>npm install</code>
+            y
+            <code>npm start</code>
+            . Su proxy espera esta API en el puerto 8080. Para Android, instala Flutter y Android SDK; en
+            <code>mobile/</code>
+            ejecuta
+            <code>flutter pub get</code>
+            y
+            <code>flutter run</code>
+            . El emulador Android accede al equipo mediante
+            <code>10.0.2.2:8080</code>
+            ; un teléfono físico necesita una URL de API accesible.
+          </p>
+          <p>
+            Estas aplicaciones administran los datos del sistema que generaste. No son el editor colaborativo
+            de Órbita.
+          </p>
+        </details>
+      </section>
+      <section id="deploy" class="guide-section">
+        <span class="step">04 / PUBLICAR</span>
+        <h2>Desplegar en Railway</h2>
+        <p>
+          Necesitas cuenta y proyecto en Railway. Instala su CLI siguiendo la
+          <a href="https://docs.railway.com/cli" target="_blank" rel="noopener noreferrer">
+            documentación oficial
+          </a>
+          . Comprueba el proyecto y el entorno elegidos antes de subir archivos.
+        </p>
+        <details open>
+          <summary>A. Desplegar esta plataforma: servicios api y web</summary>
+          <p>
+            El repositorio incluye Dockerfile en ambas carpetas. Configura PostgreSQL para
+            <code>api</code>
+            y reemplaza los valores de ejemplo en Variables de Railway. El driver debe cambiar también: la
+            configuración local fija H2.
+          </p>
+          >
+          <pre><code v-text="commands.platformVariables"></code></pre>
+          <p>Desde la raíz del repositorio, enlaza el proyecto correcto y publica cada carpeta:</p>
+          <div class="command-header">
+            <span>PowerShell · raíz de ClassForge</span>
+            <button
+              type="button"
+              @click="copy(commands.platformDeploy)"
+              class="studio-button-base studio-button"
+            >
+              Copiar
+            </button>
+          </div>
+          >
+          <pre><code v-text="commands.platformDeploy"></code></pre>
+          <p>
+            El Nginx actual del frontend escucha en 8080 y reenvía la API y WebSocket a
+            <code>api.railway.internal:8080</code>
+            . Los servicios deben estar en el mismo proyecto/entorno y el backend debe llamarse
+            <code>api</code>
+            . Si cambia el nombre o puerto, ajusta el proxy antes de desplegar.
+          </p>
+          <p>
+            Genera el dominio público del servicio
+            <code>web</code>
+            con puerto destino 8080. Comprueba el estado del despliegue y sus logs en Railway; luego verifica
+            login, carga de proyectos y sincronización con dos sesiones.
+          </p>
+        </details>
+        <details>
+          <summary>B. Desplegar el backend que descargaste</summary>
+          <p>
+            Crea un servicio separado para tu aplicación, por ejemplo
+            <code>mi-backend</code>
+            , y añade PostgreSQL. Las nuevas descargas incluyen
+            <code>Dockerfile</code>
+            ,
+            <code>.dockerignore</code>
+            y
+            <code>GUIA-EJECUCION.md</code>
+            . En un ZIP anterior puedes crear el Dockerfile junto a build.gradle con este ejemplo:
+          </p>
+          >
+          <pre><code v-text="commands.generatedDocker"></code></pre>
+          <p>
+            Configura estas variables en ese servicio. Usa la dirección interna de tu base y credenciales
+            reales;
+            <code>JWT_SECRET</code>
+            corresponde al modo autenticado. El puerto público debe apuntar al 8080 configurado aquí.
+          </p>
+          >
+          <pre><code v-text="commands.generatedVariables"></code></pre>
+          <div class="command-header">
+            <span>PowerShell · carpeta extraída</span>
+            <button
+              type="button"
+              @click="copy(commands.generatedDeploy)"
+              class="studio-button-base studio-button"
+            >
+              Copiar
+            </button>
+          </div>
+          >
+          <pre><code v-text="commands.generatedDeploy"></code></pre>
+          <p>
+            Después de un despliegue correcto, genera el dominio del servicio y úsalo como URL base en
+            Postman. Esto publica solo la API; los clientes Angular y Flutter necesitan configuración y
+            publicación propias.
+          </p>
+        </details>
+        <p class="source-note">
+          Referencia:
+          <a href="https://docs.railway.com/cli/deploying" target="_blank" rel="noopener noreferrer">
+            despliegue por carpeta con Railway CLI
+          </a>
+          . Los valores de ejemplo no son credenciales y deben reemplazarse.
+        </p>
+      </section>
+      <section id="assistant" class="guide-section">
+        <span class="step">05 / SERVICIOS OPCIONALES</span>
+        <h2>Activar los asistentes</h2>
+        <p>
+          En el editor abre
+          <strong>Texto y voz</strong>
+          o
+          <strong>Imagen a UML</strong>
+          . Los paneles consultan la disponibilidad del proveedor; que la API esté encendida no significa que
+          los modelos estén ejecutándose.
+        </p>
+        <p>
+          En Texto y voz puedes elegir entre los proveedores habilitados en el servidor y pulsar Comprobar
+          conexión. La preferencia se conserva en este navegador por proyecto y se envía en cada consulta o
+          propuesta. Para voz se usa Whisper antes del proveedor de texto seleccionado; imágenes conserva su
+          configuración propia. El estado Configurado de Bedrock no garantiza credenciales ni acceso al
+          modelo: eso se comprueba al solicitar una respuesta. Las claves y URLs se configuran únicamente en
+          el backend.
+        </p>
+        <ul class="capability-list">
+          <li>
+            <strong>Texto:</strong>
+            servidor llama.cpp con modelo compatible y herramientas, por defecto en 8092.
+          </li>
+          <li>
+            <strong>Voz:</strong>
+            whisper-server con modelo multilingüe, por defecto en 8093, además del proveedor de texto.
+          </li>
+          <li>
+            <strong>Imagen:</strong>
+            servidor multimodal compatible, por defecto en 8094.
+          </li>
+          <li>
+            <strong>Alternativa externa:</strong>
+            existe integración con Amazon Bedrock. Requiere habilitarla, configurar región/modelos y
+            credenciales en el servidor, y tener acceso a esos modelos.
+          </li>
+        </ul>
+        >
+        <pre><code v-text="commands.ai"></code></pre>
+        <p>
+          Estas son variables del backend de la plataforma. El ZIP generado utiliza otras:
+          <code>LLAMA_URL</code>
+          ,
+          <code>LLAMA_MODEL</code>
+          ,
+          <code>WHISPER_URL</code>
+          y
+          <code>APP_API_BASE_URL</code>
+          , descritas en su README.
+        </p>
+        <div class="notice">
+          En Railway,
+          <code>127.0.0.1</code>
+          identifica el contenedor, no tu computadora. Configura servicios accesibles desde el backend. Las
+          claves de proveedores se guardan en el servidor; no en el frontend. El micrófono necesita permisos y
+          HTTPS o localhost.
+        </div>
+      </section>
+      <section id="troubleshooting" class="guide-section">
+        <span class="step">06 / RESOLVER PROBLEMAS</span>
+        <h2>Antes de volver a intentarlo</h2>
+        <details>
+          <summary>Gradle se queda en EXECUTING / bootRun</summary>
+          <p>
+            Busca
+            <code>Started …Application</code>
+            y el puerto de Tomcat en los logs. Si ya aparecen, el servidor está atendiendo. IDLE describe
+            workers de Gradle, no un error. La primera ejecución puede descargar dependencias; los errores
+            reales aparecen en los logs.
+          </p>
+        </details>
+        <details>
+          <summary>Java o Node no tienen la versión correcta</summary>
+          <p>
+            Comprueba
+            <code>java -version</code>
+            ,
+            <code>javac -version</code>
+            y
+            <code>node --version</code>
+            . Después de instalar, abre una terminal nueva. En Windows,
+            <code>where.exe java</code>
+            muestra qué instalación tiene prioridad. JAVA_HOME debe apuntar a la carpeta del JDK, no a bin.
+          </p>
+        </details>
+        <details>
+          <summary>El puerto 8080 está ocupado</summary>
+          <p>Para el backend generado puedes elegir otro puerto:</p>
+          >
+          <pre><code v-text="commands.generatedPort"></code></pre>
+          <p>
+            Actualiza también Postman, el proxy de los clientes y APP_API_BASE_URL si usas el asistente
+            generado.
+          </p>
+        </details>
+        <details>
+          <summary>La API devuelve 401 o no puedo generar</summary>
+          <p>
+            Inicia sesión de nuevo y verifica el Bearer Token. Antes de exportar espera las operaciones
+            pendientes, guarda los cambios locales y valida el modelo. El diálogo de generación muestra
+            problemas de identificadores, tipos o relaciones.
+          </p>
+        </details>
+        <details>
+          <summary>Los datos desaparecen al reiniciar</summary>
+          <p>
+            Revisa si utilizas H2 en memoria, create-drop o almacenamiento efímero del contenedor. Para
+            conservar información, configura una base persistente y evita create-drop. En la plataforma, H2 en
+            archivo también necesita un volumen persistente si se usa dentro de un contenedor.
+          </p>
+        </details>
+        <a
+          href="/projects"
+          class="studio-button-base studio-button studio-unelevated-button cf-button-primary"
+        >
+          Volver a mis proyectos
+        </a>
+      </section>
+    </section>
+  </app-guide-page>
+</template>
+
+<style scoped lang="scss" src="./guide.page.scss"></style>

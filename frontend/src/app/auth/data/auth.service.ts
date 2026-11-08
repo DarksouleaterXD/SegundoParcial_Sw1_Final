@@ -1,16 +1,13 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { computed,useService,signal } from '../../core/view-state';
+import { HttpClient } from '../../core/api/http-client';
+import { Observable,tap } from 'rxjs';
 
-import { AuthResponse, AuthUser, LoginRequest, RegisterRequest } from '../model/auth';
+import { AuthResponse,AuthUser,LoginRequest,RegisterRequest } from '../model/auth';
 
 const TOKEN_KEY = 'classforge.accessToken';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class AuthService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
   private readonly tokenState = signal<string | null>(localStorage.getItem(TOKEN_KEY));
 
   readonly user = signal<AuthUser | null>(null);

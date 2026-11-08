@@ -1,133 +1,86 @@
-import { DatePipe } from '@angular/common';
+import { DestroyScope,ElementRef,afterPaint,computed,effect,useService,signal,viewChild } from '../../../core/view-state';
+import { FormControl,Validators } from '../../../core/forms';
+import { DialogService } from '../../../core/dialogs';
+import { RouteSnapshot } from '../../../core/navigation';
 import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  HostListener,
-  Injector,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import {
-  FormControl,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-
-import {
-  AttributeDialogComponent,
-  AttributeDialogResult,
+AttributeDialogComponent,
+AttributeDialogResult,
 } from '../../dialogs/attribute-dialog/attribute-dialog.component';
 import {
-  ClassDialogComponent,
+ClassDialogComponent,
 } from '../../dialogs/class-dialog/class-dialog.component';
 import {
-  ConfirmDialogComponent,
+ConfirmDialogComponent,
 } from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {
-  CollaboratorsDialogComponent,
+CollaboratorsDialogComponent,
 } from '../../dialogs/collaborators-dialog/collaborators-dialog.component';
 import {
-  RelationshipDialogComponent,
-  RelationshipDialogResult,
+RelationshipDialogComponent,
+RelationshipDialogResult,
 } from '../../dialogs/relationship-dialog/relationship-dialog.component';
 import {
-  SpringBootExportDialogComponent,
+SpringBootExportDialogComponent,
 } from '../../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component';
 import {
-  UmlCanvasComponent,
-  UmlCanvasCursorEvent,
-  UmlCanvasSelection,
-  UmlClassMovedEvent,
-  UmlRelationshipEndpoints,
+UmlCanvasCursorEvent,
+UmlCanvasSelection,
+UmlClassMovedEvent,
+UmlRelationshipEndpoints
 } from '../../diagram/uml-canvas/uml-canvas.component';
 import {
-  formatMultiplicity,
-  relationshipTypeLabel,
+formatMultiplicity,
+relationshipTypeLabel,
 } from '../../diagram/uml-relationship-shape';
 import {
-  ProjectValidationDiagnostic,
-  UmlAttribute,
-  UmlAssociationClass,
-  UmlClass,
-  UmlDataType,
-  UmlRelationship,
-  UmlVisibility,
+ProjectValidationDiagnostic,
+UmlAttribute,
+UmlAssociationClass,
+UmlClass,
+UmlDataType,
+UmlRelationship,
+UmlVisibility,
 } from '../../model/project';
 import {
-  ProjectSaveState,
-  ProjectWorkspaceStore,
+ProjectSaveState,
+ProjectWorkspaceStore,
 } from '../../state/project-workspace.store';
 import {
-  ProjectPresenceService,
+ProjectPresenceService,
 } from '../../presence/project-presence.service';
 import {
-  XmiInterchangeDialogComponent,
+XmiInterchangeDialogComponent,
 } from '../../xmi/xmi-interchange-dialog.component';
-import { ProjectAssistantPanelComponent } from '../../assistant/project-assistant-panel.component';
-import { ProjectImageUmlPanelComponent } from '../../assistant/project-image-uml-panel.component';
-import { ProjectTeamPanelComponent, ProjectTeamTab } from '../../team/project-team-panel.component';
-import { ClassMethodsComponent } from '../../methods/class-methods.component';
+import { ProjectTeamTab } from '../../team/project-team-panel.component';
 
-@Component({
-  selector: 'app-project-workspace-page',
-  imports: [
-    DatePipe,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    ReactiveFormsModule,
-    RouterLink,
-    UmlCanvasComponent,
-    ProjectAssistantPanelComponent,
-    ProjectImageUmlPanelComponent,
-    ProjectTeamPanelComponent,
-    ClassMethodsComponent,
-  ],
-  providers: [ProjectWorkspaceStore],
-  templateUrl: './project-workspace.page.html',
-  styleUrl: './project-workspace.page.scss',
-})
 export class ProjectWorkspacePage {
   private readonly route =
-    inject(ActivatedRoute);
+    useService(RouteSnapshot);
 
   private readonly dialog =
-    inject(MatDialog);
+    useService(DialogService);
 
   private readonly destroyRef =
-    inject(DestroyRef);
-  private readonly injector = inject(Injector);
+    useService(DestroyScope);
+
 
   readonly presence =
-    inject(ProjectPresenceService);
+    useService(ProjectPresenceService);
 
   readonly store =
-    inject(ProjectWorkspaceStore);
+    useService(ProjectWorkspaceStore);
 
   readonly editingName = signal(false);
   readonly focusMode = signal(false);
   readonly teamTab = signal<ProjectTeamTab>('CHAT');
 
-  jumpToSection(section: HTMLElement): void {
+  jumpToSection(section: HTMLElement | null): void {
+    if (!section) return;
     section.focus({ preventScroll: true });
     section.scrollIntoView({ block: 'start' });
   }
 
-  @HostListener('window:keydown.escape')
+
   exitFocusMode(): void {
     if (this.dialog.openDialogs.length === 0) this.focusMode.set(false);
   }
@@ -138,10 +91,10 @@ export class ProjectWorkspacePage {
   toggleTextAssistant(): void {
     this.assistantOpen.update(open => !open);
     if (this.assistantOpen()) {
-      afterNextRender(() => {
+      afterPaint(() => {
         const panel = this.textAssistantPanel()?.nativeElement;
         if (panel) this.jumpToSection(panel);
-      }, { injector: this.injector });
+      });
     }
   }
 

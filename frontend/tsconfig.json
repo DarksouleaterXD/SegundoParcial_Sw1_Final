@@ -1,26 +1,12 @@
 {
-  "compileOnSave": false,
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "target": "ES2022",
+    "verbatimModuleSyntax": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "declaration": false,
-    "experimentalDecorators": true,
-    "moduleResolution": "bundler",
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022", "dom"]
+    "noImplicitReturns": true
   },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+  "include": [".astro/types.d.ts", "src/**/*"],
+  "exclude": ["dist", "**/*.test.ts"]
 }

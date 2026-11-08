@@ -1,15 +1,9 @@
+import { useService } from '../../core/view-state';
+import { HttpClient } from '../../core/api/http-client';
 import {
-  HttpClient,
-} from '@angular/common/http';
-import {
-  Injectable,
-  inject,
-} from '@angular/core';
-
-import {
-  AssistantImagePlanResponse,
-  AssistantPlanResponse,
-  AssistantRuntimeHealthResponse,
+AssistantImagePlanResponse,
+AssistantPlanResponse,
+AssistantRuntimeHealthResponse,
 } from './assistant-model';
 
 export interface AssistantExchange {
@@ -17,9 +11,6 @@ export interface AssistantExchange {
   teamChatIncluded: boolean; createdAt: string; authorName?: string | null;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
 export class AssistantApiService {
   history(projectId: string, before?: number, shared = false) {
     const path = `/api/projects/${projectId}/assistant/history`;
@@ -39,7 +30,7 @@ export class AssistantApiService {
     );
   }
   private readonly http =
-    inject(HttpClient);
+    useService(HttpClient);
 
   plan(
     projectId: string,

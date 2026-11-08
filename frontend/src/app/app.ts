@@ -1,22 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-
+import { useService,signal } from './core/view-state';
+import { Navigation } from './core/navigation';
 import { AuthService } from './auth/data/auth.service';
 import { HealthService } from './core/api/health.service';
 
-@Component({
-  selector: 'app-root',
-  imports: [MatButtonModule, MatToolbarModule, RouterLink, RouterLinkActive, RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
-})
 export class App {
-  private readonly healthService = inject(HealthService);
-  private readonly router = inject(Router);
+  private readonly healthService = useService(HealthService);
+  private readonly router = useService(Navigation);
 
-  readonly auth = inject(AuthService);
+  readonly auth = useService(AuthService);
   readonly backendOnline = signal<boolean | null>(null);
 
   constructor() {

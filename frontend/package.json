@@ -3,39 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "start": "astro dev",
+    "build": "astro build",
     "test:generation": "node --experimental-strip-types --test src/app/projects/generation/spring-boot-generation.utils.test.ts",
     "test:commands": "node --experimental-transform-types --experimental-loader ./scripts/ts-extension-loader.mjs --test src/app/projects/commands/uml-command-characterization.test.ts",
     "test:characterization": "npm run test:generation && npm run test:commands && npm run test:workspace",
-    "test:workspace": "node --experimental-transform-types --experimental-loader ./scripts/ts-extension-loader.mjs --test src/app/projects/state/workspace/workspace-state-characterization.test.ts"
+    "test:workspace": "node --experimental-transform-types --experimental-loader ./scripts/ts-extension-loader.mjs --test src/app/projects/state/workspace/workspace-state-characterization.test.ts",
+    "preview": "astro preview",
+    "check": "astro check && vue-tsc --noEmit"
   },
   "engines": {
     "node": ">=22.22.3"
   },
   "dependencies": {
-    "@angular/animations": "^22.1.0",
-    "@angular/cdk": "22.1.0",
-    "@angular/common": "^22.1.0",
-    "@angular/compiler": "^22.1.0",
-    "@angular/core": "^22.1.0",
-    "@angular/forms": "^22.1.0",
-    "@angular/material": "22.1.0",
-    "@angular/platform-browser": "^22.1.0",
-    "@angular/router": "^22.1.0",
     "@joint/core": "4.3.2",
     "@stomp/stompjs": "7.3.0",
     "material-symbols": "0.47.0",
     "rxjs": "~7.8.2",
-    "tslib": "^2.8.1",
-    "zone.js": "~0.15.1"
+    "astro": "^6.4.8",
+    "@astrojs/vue": "^6.0.0",
+    "@vue/reactivity": "^3.5.24",
+    "vue": "^3.5.24"
   },
   "devDependencies": {
-    "@angular/build": "^22.1.0",
-    "@angular/cli": "^22.1.0",
-    "@angular/compiler-cli": "^22.1.0",
-    "typescript": "~6.0.2"
+    "@astrojs/check": "^0.9.12",
+    "sass": "^1.93.0",
+    "typescript": "~5.9.3",
+    "vue-tsc": "^3.2.0"
+  },
+  "overrides": {
+    "vite": "^7.3.2"
   }
 }

@@ -1,0 +1,29 @@
+---
+import Navigation from '../app/app.vue';
+import '../styles.scss';
+import '../app/core/studio-controls.scss';
+import '../app/app.scss';
+
+const { requiresSession = false } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Órbita Studio — Diseña, colabora y genera aplicaciones desde tu modelo UML." />
+    <title>Órbita Studio</title>
+    {requiresSession && <script is:inline>
+      if (!localStorage.getItem('classforge.accessToken')) {
+        const returnUrl = location.pathname + location.search + location.hash;
+        location.replace('/login?returnUrl=' + encodeURIComponent(returnUrl));
+      }
+    </script>}
+  </head>
+  <body>
+    <div class="app-shell">
+      <Navigation client:only="vue" />
+      <main class="app-content" id="main-content" tabindex="-1"><slot /></main>
+    </div>
+  </body>
+</html>

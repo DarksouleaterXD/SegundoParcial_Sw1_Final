@@ -1,5 +1,5 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { useService } from '../../core/view-state';
+import { HttpClient,HttpResponse } from '../../core/api/http-client';
 import { Observable } from 'rxjs';
 
 import { Project } from '../model/project';
@@ -24,9 +24,8 @@ export interface XmiImportPreview {
   diagnostics: XmiDiagnostic[];
 }
 
-@Injectable({ providedIn: 'root' })
 export class XmiInterchangeApiService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
 
   previewImport(projectId: string, file: File): Observable<XmiImportPreview> {
     const body = new FormData();

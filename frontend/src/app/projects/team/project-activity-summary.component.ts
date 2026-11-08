@@ -1,8 +1,5 @@
-import { DatePipe } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, effect, inject, input, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { DestroyScope,effect,useService,signal,untracked,untilDestroyed,viewProp } from '../../core/view-state';
+import { HttpClient,HttpErrorResponse } from '../../core/api/http-client';
 import { Subscription } from 'rxjs';
 
 interface Summary {
@@ -13,14 +10,11 @@ interface Summary {
 function localDate(date: Date): string {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0,16);
 }
-@Component({
-  selector: 'app-project-activity-summary', imports: [DatePipe, FormsModule],
-  templateUrl: './project-activity-summary.component.html', styleUrl: './project-activity-summary.component.scss',
-})
+
 export class ProjectActivitySummaryComponent {
-  readonly projectId = input.required<string>();
-  private readonly http = inject(HttpClient);
-  private readonly destroyRef = inject(DestroyRef);
+  readonly projectId = viewProp<string>('projectId');
+  private readonly http = useService(HttpClient);
+  private readonly destroyRef = useService(DestroyScope);
   private request?: Subscription;
   readonly result = signal<Summary | null>(null);
   readonly loading = signal(false);
@@ -49,7 +43,7 @@ export class ProjectActivitySummaryComponent {
     if (this.actorId) params['actorId'] = this.actorId;
     this.loading.set(true); this.error.set(''); this.copied.set('');
     this.request = this.http.get<Summary>('/api/projects/' + projectId + '/journal/summary', {params})
-      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      .pipe(untilDestroyed(this.destroyRef)).subscribe({
         next: result => { this.result.set(result); this.loading.set(false); },
         error: (error: HttpErrorResponse) => {
           this.loading.set(false);

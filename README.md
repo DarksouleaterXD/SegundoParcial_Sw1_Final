@@ -17,7 +17,7 @@ El incremento ejecutable actual incluye:
 - autenticación local, JWT, BCrypt y ownership;
 - CU-01 crear proyecto;
 - CU-02 abrir y guardar `ProjectDocument` con revisión;
-- CU-03 modelado UML manual mediante Angular + JointJS;
+- CU-03 modelado UML manual mediante Astro, Vue y JointJS;
 - clases, atributos, layout, relaciones y multiplicidades;
 - Association, Aggregation, Composition y Generalization;
 - CU-04 validación UML explícita;
@@ -122,9 +122,12 @@ GET http://localhost:8082/api/health
 
 ## Ejecutar frontend
 
+Órbita Studio usa Astro para las páginas y Vue para los componentes interactivos del editor.
+Usa Node.js 22.22.3 o superior.
+
 ```powershell
 cd frontend
-npm install
+npm ci
 npm start
 ```
 
@@ -134,7 +137,11 @@ Frontend:
 http://localhost:4200
 ```
 
-El proxy Angular reenvía `/api/*` a `http://localhost:8082`.
+El proxy de desarrollo reenvía `/api/*` y `/ws` a `http://127.0.0.1:8082`.
+Puedes cambiar ese destino con la variable `CLASSFORGE_API_ORIGIN`.
+
+`npm run build` genera el sitio estático en `frontend/dist`. El Dockerfile del frontend lo sirve
+con Nginx en el puerto 8080 y admite enlaces directos a `/projects/<id>`.
 
 ## Runtimes locales del Asistente
 
@@ -188,4 +195,4 @@ El cierre de legibilidad del 14 de septiembre de 2026 no modifica funcionalidade
 
 ## Deployment AWS de demostración
 
-El perfil `aws-demo` mantiene Angular/Spring/Whisper en una EC2 detrás de CloudFront/Nginx y usa Amazon Bedrock para texto/visión mediante los mismos ports del Assistant. Ver `docs/runtime/aws-demo-deployment.md` y `docs/formal/deployment-diagram-spec.md`.
+El perfil `aws-demo` aloja el frontend Astro, Spring y Whisper en una EC2 detrás de CloudFront/Nginx y usa Amazon Bedrock para texto y visión. Ver `docs/runtime/aws-demo-deployment.md` y `docs/formal/deployment-diagram-spec.md`.

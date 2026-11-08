@@ -1,0 +1,260 @@
+.studio-view {
+  display: block;
+  min-width: 0;
+}
+
+.studio-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 64px;
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.87);
+  font:
+    500 14px Roboto,
+    sans-serif;
+  letter-spacing: 0.0892857143em;
+  text-decoration: none;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.studio-button-base:hover:not(:disabled) {
+  background: rgb(0 0 0 / 4%);
+}
+.studio-button-base:disabled {
+  color: rgb(0 0 0 / 38%);
+  cursor: default;
+}
+.studio-unelevated-button,
+.studio-outlined-button {
+  padding: 0 16px;
+}
+.studio-unelevated-button {
+  background: #3f51b5;
+  color: white;
+}
+.studio-outlined-button {
+  border: 1px solid rgb(0 0 0 / 12%);
+}
+.studio-icon-button {
+  min-width: 0;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  border-radius: 50%;
+}
+
+cf-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: #fff;
+}
+
+cf-card.studio-card-outlined {
+  border: 1px solid var(--cf-border);
+}
+cf-card-header {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 0;
+}
+cf-card-title {
+  display: block;
+  font:
+    500 20px/32px Roboto,
+    sans-serif;
+  letter-spacing: 0.0125em;
+}
+cf-card-subtitle {
+  display: block;
+  font:
+    500 14px/22px Roboto,
+    sans-serif;
+  color: rgb(0 0 0 / 54%);
+}
+cf-card-content {
+  display: block;
+  padding: 0 16px;
+}
+cf-card-content:first-child {
+  padding-top: 16px;
+}
+cf-card-content:last-child {
+  padding-bottom: 16px;
+}
+cf-card-actions {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px;
+}
+
+.studio-field {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+  font:
+    400 16px/24px Roboto,
+    sans-serif;
+  letter-spacing: 0.03125em;
+}
+.studio-field-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 4px;
+  color: rgb(0 0 0 / 87%);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 38%);
+}
+.studio-field-control:hover {
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 87%);
+}
+.studio-field-control:focus-within {
+  box-shadow: inset 0 0 0 2px #3f51b5;
+}
+.studio-field-control:has([aria-invalid='true']) {
+  box-shadow: inset 0 0 0 1px #f44336;
+}
+.studio-field-control cf-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  line-height: normal;
+  transform: translateY(-50%);
+  color: rgb(0 0 0 / 54%);
+  pointer-events: none;
+}
+.studio-field-control:has([aria-required='true']) cf-label::after {
+  content: '*';
+}
+.studio-field-control:not(:focus-within) :is(input, textarea)::placeholder {
+  color: transparent;
+}
+.studio-field-control:focus-within cf-label,
+.studio-field-control:has(input:not(:placeholder-shown), textarea:not(:placeholder-shown), select) cf-label {
+  top: 0;
+  left: 12px;
+  padding: 0 4px;
+  background: #fff;
+  font-size: 12px;
+}
+.studio-field-control:focus-within cf-label {
+  color: #3f51b5;
+}
+.studio-field-control:has([aria-invalid='true']) cf-label {
+  color: #f44336;
+}
+.studio-field-control :is(input, textarea, select) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.studio-field-control textarea {
+  margin: 14px 0;
+}
+.studio-field-notes {
+  display: block;
+  min-height: 22px;
+  padding: 0 16px;
+  font-size: 12px;
+  line-height: 20px;
+}
+.studio-field[subscriptSizing='dynamic'] .studio-field-notes:not(:has(cf-error, cf-hint)) {
+  min-height: 0;
+}
+cf-error {
+  display: block;
+  color: #f44336;
+}
+.studio-field:not(:has([aria-invalid='true'])) cf-error {
+  display: none;
+}
+cf-hint {
+  display: block;
+}
+
+cf-radio-group {
+  display: flex;
+}
+cf-radio-button,
+cf-checkbox {
+  display: inline-flex;
+  align-items: center;
+}
+:is(cf-radio-button, cf-checkbox) label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+:is(cf-radio-button, cf-checkbox) input {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff4081;
+}
+
+.studio-dialog {
+  max-height: 90vh;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--cf-text);
+  box-shadow:
+    0 11px 15px -7px rgb(0 0 0 / 20%),
+    0 24px 38px 3px rgb(0 0 0 / 14%),
+    0 9px 46px 8px rgb(0 0 0 / 12%);
+}
+.studio-dialog::backdrop {
+  background: rgb(0 0 0 / 32%);
+}
+.studio-dialog-title {
+  margin: 0;
+  padding: 6px 24px 12px;
+  font:
+    500 20px/32px Roboto,
+    sans-serif;
+}
+cf-dialog-content {
+  display: block;
+  max-height: 65vh;
+  overflow: auto;
+  padding: 0 24px 20px;
+  line-height: 1.65;
+}
+cf-dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 24px 12px;
+}
+cf-dialog-actions[align='end'] {
+  justify-content: flex-end;
+}
+.studio-spinner {
+  display: inline-block;
+  width: var(--spinner-size, 32px);
+  height: var(--spinner-size, 32px);
+  border: 3px solid #e6ddf3;
+  border-top-color: var(--cf-primary);
+  border-radius: 50%;
+  animation: cf-symbol-spin 800ms linear infinite;
+}

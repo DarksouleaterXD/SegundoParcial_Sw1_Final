@@ -197,7 +197,7 @@ test('keeps baseRevision automatic and adds explicit non-persistent primary-key 
   );
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -209,14 +209,17 @@ test('keeps baseRevision automatic and adds explicit non-persistent primary-key 
   );
   assert.doesNotMatch(
     dialog,
-    /formControlName="baseRevision"/,
+    /v-model="form\.controls\.baseRevision\.value"/,
   );
   assert.match(
     dialog,
     /generate\(true\)/,
   );
   assert.match(
-    dialog,
+    readFileSync(
+      new URL('../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts', import.meta.url),
+      'utf8',
+    ),
     /useFirstAttributeAsIdentifier/,
   );
   assert.match(
@@ -232,7 +235,7 @@ test('keeps baseRevision automatic and adds explicit non-persistent primary-key 
 test('exposes the two CU-14 generation modes and explicit Auth selectors', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -242,16 +245,16 @@ test('exposes the two CU-14 generation modes and explicit Auth selectors', () =>
   assert.match(dialog, /value="AUTH_INFORMATION_SYSTEM"/);
   assert.match(dialog, /CRUD simple/);
   assert.match(dialog, /Sistema de Informacion con Auth/);
-  assert.match(dialog, /formControlName="authClassId"/);
-  assert.match(dialog, /formControlName="usernameAttributeId"/);
-  assert.match(dialog, /formControlName="passwordAttributeId"/);
+  assert.match(dialog, /v-model="form\.controls\.authClassId\.value"/);
+  assert.match(dialog, /v-model="form\.controls\.usernameAttributeId\.value"/);
+  assert.match(dialog, /v-model="form\.controls\.passwordAttributeId\.value"/);
   assert.match(dialog, /login y JWT/);
 });
 
 test('advertises CU-15 OpenAPI and Postman artifacts without adding a new mode', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -259,14 +262,14 @@ test('advertises CU-15 OpenAPI and Postman artifacts without adding a new mode',
 
   assert.match(dialog, /openapi\.yaml/);
   assert.match(dialog, /coleccion Postman/i);
-  assert.doesNotMatch(dialog, /formControlName="(?:openApi|postman|apiArtifacts)"/);
+  assert.doesNotMatch(dialog, /v-model="form\.controls\.(?:openApi|postman|apiArtifacts)\.value"/);
 });
 
 
 test('advertises CU-16 Domain Manifest as a generated artifact without adding configuration', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -274,16 +277,20 @@ test('advertises CU-16 Domain Manifest as a generated artifact without adding co
 
   assert.match(dialog, /domain-manifest\.json/);
   assert.match(dialog, /semantica del dominio/i);
-  assert.doesNotMatch(dialog, /formControlName="(?:domainManifest|manifestSchema|manifestAliases)"/);
+  assert.doesNotMatch(dialog, /v-model="form\.controls\.(?:domainManifest|manifestSchema|manifestAliases)\.value"/);
 });
 
 
 test('configures CU-17 generated Angular UI with a user-selected primary color', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
+    'utf8',
+  );
+  const controller = readFileSync(
+    new URL('../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts', import.meta.url),
     'utf8',
   );
   const model = readFileSync(
@@ -294,10 +301,10 @@ test('configures CU-17 generated Angular UI with a user-selected primary color',
     'utf8',
   );
 
-  assert.match(dialog, /formControlName="primaryColor"/);
+  assert.match(dialog, /v-model="form\.controls\.primaryColor\.value"/);
   assert.match(dialog, /type="color"/);
-  assert.match(dialog, /#2563EB/);
-  assert.match(dialog, /frontend Angular/i);
+  assert.match(controller, /#2563EB/);
+  assert.match(dialog, /frontend\s+Angular/i);
   assert.match(dialog, /dashboard/i);
   assert.match(dialog, /componentes\s+especificos/i);
   assert.match(model, /primaryColor:\s*string/);
@@ -307,7 +314,7 @@ test('configures CU-17 generated Angular UI with a user-selected primary color',
 test('advertises CU-18 Flutter Android generation without adding a new mode or color setting', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -316,13 +323,13 @@ test('advertises CU-18 Flutter Android generation without adding a new mode or c
   assert.match(dialog, /Flutter mobile/i);
   assert.match(dialog, /Android/i);
   assert.match(dialog, /interfaces Angular y Flutter/i);
-  assert.doesNotMatch(dialog, /formControlName="(?:flutter|mobileMode|mobilePrimaryColor)"/);
+  assert.doesNotMatch(dialog, /v-model="form\.controls\.(?:flutter|mobileMode|mobilePrimaryColor)\.value"/);
 });
 
 test('advertises CU-19 generated application assistant without adding a new mode', () => {
   const dialog = readFileSync(
     new URL(
-      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.ts',
+      '../dialogs/spring-boot-export-dialog/spring-boot-export-dialog.component.vue',
       import.meta.url,
     ),
     'utf8',
@@ -332,5 +339,5 @@ test('advertises CU-19 generated application assistant without adding a new mode
   assert.match(dialog, /Whisper/i);
   assert.match(dialog, /Qwen\/llama\.cpp/i);
   assert.match(dialog, /preview\/confirmacion/i);
-  assert.doesNotMatch(dialog, /formControlName="(?:assistant|llama|whisper|voiceMode)"/);
+  assert.doesNotMatch(dialog, /v-model="form\.controls\.(?:assistant|llama|whisper|voiceMode)\.value"/);
 });

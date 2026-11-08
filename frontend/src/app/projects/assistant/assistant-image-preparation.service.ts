@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-
 export interface AssistantPreparedImage {
   file: File;
   previewUrl: string;
@@ -7,7 +5,6 @@ export interface AssistantPreparedImage {
   cropInsetPercent: number;
 }
 
-@Injectable({ providedIn: 'root' })
 export class AssistantImagePreparationService {
   async prepare(
     source: File,

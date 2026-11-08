@@ -1,16 +1,12 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
+import { useService } from '../view-state';
+import { HttpClient } from './http-client';
 export interface HealthResponse {
   status: string;
   application: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
 export class HealthService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
 
   getHealth() {
     return this.http.get<HealthResponse>('/api/health');

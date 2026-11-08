@@ -20,6 +20,6 @@ if (Test-Path $stateDir) {
 
 Write-Host "CU-27 demo data reset complete."
 Write-Host "Only backend/data/classforge-demo* and the local .demo scratch directory were removed."
-Write-Host "No Spring or Angular server was started or stopped."
+Write-Host "No Spring or Astro server was started or stopped."
 
 & (Join-Path $PSScriptRoot "demo-start.ps1")

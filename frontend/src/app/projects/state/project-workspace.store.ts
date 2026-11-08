@@ -1,60 +1,47 @@
+import { computed,DestroyScope,useService,signal,untilDestroyed } from '../../core/view-state';
+import { HttpErrorResponse } from '../../core/api/http-client';
 import {
-  HttpErrorResponse,
-} from '@angular/common/http';
-import {
-  computed,
-  DestroyRef,
-  inject,
-  Injectable,
-  signal,
-} from '@angular/core';
-import {
-  takeUntilDestroyed,
-} from '@angular/core/rxjs-interop';
-import {
-  finalize,
+finalize,
 } from 'rxjs';
 
 import {
-  AuthService,
+AuthService,
 } from '../../auth/data/auth.service';
 import {
-  ProjectCollaborationService,
+ProjectCollaborationService,
 } from '../collaboration/project-collaboration.service';
 import {
-  CollaborationStatus,
-  ProjectOperation,
-  ProjectOperationApplied,
-  ProjectOperationRejected,
+CollaborationStatus,
+ProjectOperation,
+ProjectOperationApplied,
+ProjectOperationRejected,
 } from '../collaboration/collaboration-protocol';
 import {
-  commandMetadata,
-  UmlCommand,
+commandMetadata,
+UmlCommand,
 } from '../commands/uml-command';
 import {
-  UmlCommandError,
+UmlCommandError,
 } from '../commands/uml-command-error';
 import {
-  ProjectApiService,
+ProjectApiService,
 } from '../data/project-api.service';
 import { WorkspaceDocumentSession } from './workspace/workspace-document-session';
 import { WorkspaceCollaborationState } from './workspace/workspace-collaboration-state';
 import {
-  normalizeUmlClassLayout,
-  UML_CLASS_MIN_WIDTH,
-  umlClassHeight,
+normalizeUmlClassLayout,
+UML_CLASS_MIN_WIDTH,
+umlClassHeight,
 } from '../diagram/uml-class-geometry';
 import {
-  BackendValidationError,
-  BackendValidationViolation,
-  DiagramNodeLayout,
-  Project,
-  ProjectDocument,
-  ProjectValidationResult,
-  UmlAttribute,
-  UmlAssociationClass,
-  UmlClass,
-  UmlRelationship,
+BackendValidationError,
+BackendValidationViolation,
+DiagramNodeLayout,
+Project,
+ProjectDocument,
+ProjectValidationResult,
+UmlAttribute,UmlClass,
+UmlRelationship
 } from '../model/project';
 
 export type ProjectSaveState =
@@ -64,19 +51,18 @@ export type ProjectSaveState =
   | 'conflict'
   | 'error';
 
-@Injectable()
 export class ProjectWorkspaceStore {
   private readonly projectApi =
-    inject(ProjectApiService);
+    useService(ProjectApiService);
 
   private readonly auth =
-    inject(AuthService);
+    useService(AuthService);
 
   private readonly collaboration =
-    inject(ProjectCollaborationService);
+    useService(ProjectCollaborationService);
 
   private readonly destroyRef =
-    inject(DestroyRef);
+    useService(DestroyScope);
 
   private readonly documentSession =
     new WorkspaceDocumentSession();
@@ -273,7 +259,7 @@ export class ProjectWorkspaceStore {
     this.collaboration
       .connectionEvents$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )
@@ -300,7 +286,7 @@ export class ProjectWorkspaceStore {
     this.collaboration
       .appliedOperations$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )
@@ -314,7 +300,7 @@ export class ProjectWorkspaceStore {
     this.collaboration
       .rejectedOperations$
       .pipe(
-        takeUntilDestroyed(
+        untilDestroyed(
           this.destroyRef,
         ),
       )

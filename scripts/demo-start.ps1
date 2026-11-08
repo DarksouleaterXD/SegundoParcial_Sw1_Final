@@ -12,7 +12,7 @@ if (-not (Test-Path $demoFixture)) {
 
 Write-Host ""
 Write-Host "CU-27 DEMO PREPARED"
-Write-Host "No Spring or Angular server was started by this script."
+Write-Host "No Spring or Astro server was started by this script."
 Write-Host ""
 Write-Host "Backend console:"
 Write-Host "  cd `"$root\backend`""

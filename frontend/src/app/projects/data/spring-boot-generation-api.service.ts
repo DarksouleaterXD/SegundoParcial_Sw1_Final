@@ -1,35 +1,26 @@
+import { useService } from '../../core/view-state';
+import { HttpClient,HttpErrorResponse } from '../../core/api/http-client';
 import {
-  HttpClient,
-  HttpErrorResponse,
-} from '@angular/common/http';
-import {
-  inject,
-  Injectable,
-} from '@angular/core';
-import {
-  catchError,
-  from,
-  map,
-  mergeMap,
-  Observable,
-  throwError,
+catchError,
+from,
+map,
+mergeMap,
+Observable,
+throwError,
 } from 'rxjs';
 
 import {
-  SpringBootGenerationApiError,
-  SpringBootGenerationDownload,
-  SpringBootGenerationErrorPayload,
-  SpringBootGenerationRequest,
+SpringBootGenerationApiError,
+SpringBootGenerationDownload,
+SpringBootGenerationErrorPayload,
+SpringBootGenerationRequest,
 } from '../generation/spring-boot-generation.model';
 import {
-  extractSpringDownloadFileName,
+extractSpringDownloadFileName,
 } from '../generation/spring-boot-generation.utils';
 
-@Injectable({
-  providedIn: 'root',
-})
 export class SpringBootGenerationApiService {
-  private readonly http = inject(HttpClient);
+  private readonly http = useService(HttpClient);
   private readonly baseUrl = '/api/projects';
 
   generate(

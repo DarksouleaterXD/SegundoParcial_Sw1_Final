@@ -1,47 +1,26 @@
+import { DestroyScope,untracked,useService,signal,untilDestroyed } from '../../core/view-state';
+import { FormControl,Validators } from '../../core/forms';
+import { HttpErrorResponse } from '../../core/api/http-client';
+import { AssistantChangeReview,reviewAssistantCommand } from './assistant-change-review';
+
 import {
-  HttpErrorResponse,
-} from '@angular/common/http';
-import {
-  Component,
-  DestroyRef,
-  untracked,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AssistantChangeReview, reviewAssistantCommand } from './assistant-change-review';
-import { AssistantProviderSettingsComponent } from './assistant-provider-settings.component';
-import { AssistantHistoryComponent } from './assistant-history.component';
-import {
-  FormControl,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import {
-  MatButtonModule,
-} from '@angular/material/button';
-import {
-  MatProgressSpinnerModule,
-} from '@angular/material/progress-spinner';
-import {
-  finalize,
+finalize,
 } from 'rxjs';
 
 import {
-  ProjectWorkspaceStore,
+ProjectWorkspaceStore,
 } from '../state/project-workspace.store';
 import {
-  AssistantApiService,
+AssistantApiService,
 } from './assistant-api.service';
 import {
-  BrowserWavRecorderService,
+BrowserWavRecorderService,
 } from './browser-wav-recorder.service';
 import {
-  AssistantAttributePlan,
-  AssistantPlanAction,
-  AssistantPlanResponse,
-  AssistantRuntimeHealthResponse,
+AssistantAttributePlan,
+AssistantPlanAction,
+AssistantPlanResponse,
+AssistantRuntimeHealthResponse,
 } from './assistant-model';
 
 interface ChatMessage {
@@ -50,22 +29,10 @@ interface ChatMessage {
   context?: { revision: number; messages: number; included: boolean; changed: boolean; provider: string };
 }
 
-@Component({
-  selector: 'app-project-assistant-panel',
-  imports: [
-    MatButtonModule,
-    AssistantProviderSettingsComponent,
-    AssistantHistoryComponent,
-    MatProgressSpinnerModule,
-    ReactiveFormsModule,
-  ],
-  templateUrl: './project-assistant-panel.component.html',
-  styleUrl: './project-assistant-panel.component.scss',
-})
 export class ProjectAssistantPanelComponent
-  implements OnDestroy {
-  private readonly api = inject(AssistantApiService);
-  private readonly destroyRef = inject(DestroyRef);
+   {
+  private readonly api = useService(AssistantApiService);
+  private readonly destroyRef = useService(DestroyScope);
   readonly mode = signal<'QUERY' | 'CHANGE'>('QUERY');
   readonly provider = signal('');
   selectProvider(provider: string): void {
@@ -76,10 +43,10 @@ export class ProjectAssistantPanelComponent
   readonly includeTeamChat = signal(false);
   readonly sharedQuery = signal(false);
   readonly historyRefresh = signal(0);
-  private readonly recorder = inject(BrowserWavRecorderService);
+  private readonly recorder = useService(BrowserWavRecorderService);
   private voiceTimer: number | null = null;
 
-  readonly store = inject(ProjectWorkspaceStore);
+  readonly store = useService(ProjectWorkspaceStore);
   readonly prompt = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(1000)],
@@ -92,7 +59,6 @@ export class ProjectAssistantPanelComponent
   readonly deletionAcknowledged = signal(false);
   readonly error = signal<string | null>(null);
   readonly messages = signal<ChatMessage[]>([]);
-
 
   send(): void {
     if (!this.provider()) return;
@@ -146,7 +112,7 @@ export class ProjectAssistantPanelComponent
     this.error.set(null); this.planning.set(true);
     const provider = this.provider();
     this.api.ask(project.id, text, this.includeTeamChat(), provider, this.sharedQuery()).pipe(
-      takeUntilDestroyed(this.destroyRef), finalize(() => this.planning.set(false)),
+      untilDestroyed(this.destroyRef), finalize(() => this.planning.set(false)),
     ).subscribe({
       next: result => {
         if (this.store.project()?.id !== project.id) return;
@@ -254,7 +220,7 @@ export class ProjectAssistantPanelComponent
     return `${attribute.name ?? '?'}: ${attribute.dataType ?? 'STRING'}${attribute.identifier ? ' · ID' : ''}`;
   }
 
-  ngOnDestroy(): void {
+  dispose(): void {
     this.clearVoiceTimer();
     void this.recorder.cancel();
   }
@@ -313,7 +279,6 @@ export class ProjectAssistantPanelComponent
       this.error.set('No pudimos procesar la grabación.');
     }
   }
-
 
   private runtimeReadyForText(): boolean {
     return this.runtimeHealth()?.readyForText ?? false;

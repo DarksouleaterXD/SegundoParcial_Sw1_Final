@@ -1,40 +1,18 @@
-import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router, RouterLink } from '@angular/router';
-import { finalize, timer } from 'rxjs';
+import { DestroyScope,computed,useService,signal,untilDestroyed } from '../../../core/view-state';
+import { FormControl,FormGroup,Validators } from '../../../core/forms';
+import { Navigation } from '../../../core/navigation';
+import { finalize,timer } from 'rxjs';
 
 import { ProjectApiService } from '../../data/project-api.service';
 import { ProjectInvitationApiService } from '../../data/project-invitation-api.service';
 import { Project } from '../../model/project';
 import { ProjectInvitation } from '../../model/project-invitation';
 
-@Component({
-  selector: 'app-project-list-page',
-  imports: [
-    DatePipe,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    ReactiveFormsModule,
-    RouterLink,
-  ],
-  templateUrl: './project-list.page.html',
-  styleUrl: './project-list.page.scss',
-})
 export class ProjectListPage {
-  private readonly projectApi = inject(ProjectApiService);
-  private readonly invitationApi = inject(ProjectInvitationApiService);
-  private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly projectApi = useService(ProjectApiService);
+  private readonly invitationApi = useService(ProjectInvitationApiService);
+  private readonly router = useService(Navigation);
+  private readonly destroyRef = useService(DestroyScope);
 
   readonly projects = signal<Project[]>([]);
   readonly query = signal('');
@@ -70,7 +48,7 @@ export class ProjectListPage {
     this.loadPendingInvitations();
 
     timer(10_000, 10_000)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(untilDestroyed(this.destroyRef))
       .subscribe(() => this.loadPendingInvitations(true));
   }
 
@@ -95,7 +73,7 @@ export class ProjectListPage {
       .create({ name })
       .pipe(
         finalize(() => this.creating.set(false)),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (project) => {
@@ -121,7 +99,7 @@ export class ProjectListPage {
       .accept(invitation.id)
       .pipe(
         finalize(() => this.invitationActionId.set(null)),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
@@ -150,7 +128,7 @@ export class ProjectListPage {
       .decline(invitation.id)
       .pipe(
         finalize(() => this.invitationActionId.set(null)),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
@@ -182,7 +160,7 @@ export class ProjectListPage {
       .list()
       .pipe(
         finalize(() => this.loading.set(false)),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (projects) => this.projects.set(projects),
@@ -208,7 +186,7 @@ export class ProjectListPage {
             this.invitationsLoading.set(false);
           }
         }),
-        takeUntilDestroyed(this.destroyRef),
+        untilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (invitations) => this.pendingInvitations.set(invitations),

@@ -1,13 +1,4 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-
-@Component({
-  selector: 'app-guide-page',
-  imports: [RouterLink, MatButtonModule],
-  templateUrl: './guide.page.html',
-  styleUrl: './guide.page.scss',
-})
+import { signal } from '../core/view-state';
 export class GuidePage {
   readonly copyMessage = signal('');
   readonly commands = {
