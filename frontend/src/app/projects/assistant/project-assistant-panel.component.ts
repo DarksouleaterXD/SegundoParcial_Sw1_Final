@@ -94,8 +94,8 @@ export class ProjectAssistantPanelComponent
           { role: 'assistant', text: plan.summary },
         ]);
       },
-      error: () => {
-        const message = 'El asistente no está disponible en este momento.';
+      error: (error: unknown) => {
+        const message = this.planError(error);
         this.error.set(message);
         this.messages.update((messages) => [
           ...messages,
@@ -270,7 +270,7 @@ export class ProjectAssistantPanelComponent
             { role: 'assistant', text: plan.summary },
           ]);
         },
-        error: () => this.error.set('El asistente no está disponible en este momento.'),
+        error: (error: unknown) => this.error.set(this.planError(error)),
       });
     } catch {
       await this.recorder.cancel();
@@ -282,6 +282,14 @@ export class ProjectAssistantPanelComponent
 
   private runtimeReadyForText(): boolean {
     return this.runtimeHealth()?.readyForText ?? false;
+  }
+
+  private planError(error: unknown): string {
+    if (this.provider() === 'gemini' && error instanceof HttpErrorResponse
+        && error.status === 503 && typeof error.error?.message === 'string') {
+      return error.error.message;
+    }
+    return 'El asistente no está disponible en este momento.';
   }
 
   private runtimeReadyForVoice(): boolean {

@@ -1,6 +1,7 @@
 package com.classforge.assistant;
 
 import com.classforge.project.application.ProjectService;
+import com.classforge.assistant.tools.GeminiAssistantGateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class AssistantRuntimeHealthService {
     private final String bedrockRegion;
     private final String bedrockTextModel;
     private final String bedrockVisionModel;
+    private final GeminiAssistantGateway gemini;
 
     public AssistantRuntimeHealthService(
             ProjectService projectService,
@@ -35,7 +37,8 @@ public class AssistantRuntimeHealthService {
             @Value("${classforge.assistant.vision.model:vision-model}") String visionModel,
             @Value("${classforge.assistant.bedrock.region:us-east-1}") String bedrockRegion,
             @Value("${classforge.assistant.bedrock.text-model:us.amazon.nova-2-lite-v1:0}") String bedrockTextModel,
-            @Value("${classforge.assistant.bedrock.vision-model:us.amazon.nova-2-lite-v1:0}") String bedrockVisionModel
+            @Value("${classforge.assistant.bedrock.vision-model:us.amazon.nova-2-lite-v1:0}") String bedrockVisionModel,
+            GeminiAssistantGateway gemini
     ) {
         this.projectService = projectService;
         this.runtimeProbe = runtimeProbe;
@@ -49,6 +52,7 @@ public class AssistantRuntimeHealthService {
         this.bedrockRegion = bedrockRegion;
         this.bedrockTextModel = bedrockTextModel;
         this.bedrockVisionModel = bedrockVisionModel;
+        this.gemini = gemini;
     }
 
     public AssistantRuntimeHealthResponse health(UUID userId, UUID projectId) {
@@ -58,9 +62,14 @@ public class AssistantRuntimeHealthService {
     public AssistantRuntimeHealthResponse healthForProvider(UUID userId, UUID projectId, String selectedProvider) {
         projectService.get(userId, projectId);
 
-        AssistantRuntimeStatus text = "bedrock".equals(selectedProvider)
-                ? configuredBedrock("bedrock-text", bedrockTextModel)
-                : runtimeProbe.probe("llama.cpp", llamaUrl);
+        AssistantRuntimeStatus text = switch (normalized(selectedProvider, "llama-cpp")) {
+            case "gemini" -> new AssistantRuntimeStatus(
+                    "gemini", gemini.configured(), gemini.configured() ? "CONFIGURED" : "UNAVAILABLE", 0,
+                    gemini.configured() ? gemini.model() + " · El acceso se verifica al enviar una consulta"
+                            : "Falta GEMINI_API_KEY en el servidor");
+            case "bedrock" -> configuredBedrock("bedrock-text", bedrockTextModel);
+            default -> runtimeProbe.probe("llama.cpp", llamaUrl);
+        };
 
         AssistantRuntimeStatus whisper = runtimeProbe.probe("whisper.cpp", whisperUrl);
 

@@ -115,6 +115,14 @@ export interface AssistantImageMetadata {
   reencoded: boolean;
 }
 
+export function assistantProviderLabel(provider: string): string {
+  switch (provider) {
+    case 'gemini': return 'Google Gemini';
+    case 'bedrock': return 'Amazon Bedrock';
+    default: return 'llama.cpp';
+  }
+}
+
 export interface AssistantImagePlanResponse
   extends AssistantPlanResponse {
   source: 'IMAGE';

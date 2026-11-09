@@ -70,13 +70,55 @@ Antes de abrir el caso de uso:
 1. iniciar llama-server;
 2. iniciar whisper-server;
 3. iniciar Spring;
-4. iniciar Angular;
+4. iniciar Astro;
 5. abrir un proyecto;
 6. comprobar que el panel muestra ambos runtimes en estado listo.
 
 Texto requiere llama.cpp.
 
-Voz requiere llama.cpp + whisper.cpp.
+Voz requiere whisper.cpp y un proveedor de texto disponible.
+
+## Modelo en la nube para consultas y propuestas
+
+### Google Gemini
+
+Crea una clave de API en [Google AI Studio](https://aistudio.google.com/apikey).
+Para usarla en local, detén Spring Boot y ejecuta desde `backend`:
+
+```powershell
+$geminiSecret = Read-Host 'Clave de Google AI Studio' -AsSecureString
+$env:GEMINI_API_KEY = [System.Net.NetworkCredential]::new('', $geminiSecret).Password
+.\gradlew.bat bootRun '--args=--spring.datasource.url=jdbc:h2:file:./data/cierre-casos'
+```
+
+El modelo predeterminado es `gemini-3.5-flash`. Puedes cambiarlo con
+`CLASSFORGE_GEMINI_MODEL`. Selecciona **Google Gemini** en **Texto y voz**.
+Con ese proveedor, las consultas y propuestas envían el texto y el contexto pertinente
+del proyecto a la API de Google. Whisper sigue transcribiendo el audio localmente.
+
+### Amazon Bedrock
+
+Puedes habilitar Amazon Bedrock en el arranque local de Spring Boot. El selector de
+**Texto y voz** permite elegir el proveedor por proyecto. Whisper transcribe la grabación
+en el equipo y el proveedor elegido recibe la transcripción y el contexto UML necesarios
+para elaborar la propuesta.
+
+Con credenciales AWS disponibles para el SDK y permiso de invocar el modelo, inicia
+Spring Boot desde `backend` con las siguientes variables en esa consola. Usa este arranque
+con la base de demostración `cierre-casos`.
+
+```powershell
+$env:AWS_REGION = 'us-east-1'
+$env:CLASSFORGE_ASSISTANT_TEXT_PROVIDER = 'llama-cpp'
+$env:CLASSFORGE_BEDROCK_ENABLED = 'true'
+$env:CLASSFORGE_BEDROCK_TEXT_MODEL = 'us.amazon.nova-2-lite-v1:0'
+.\gradlew.bat bootRun '--args=--spring.datasource.url=jdbc:h2:file:./data/cierre-casos'
+```
+
+En **Texto y voz**, selecciona **Amazon Bedrock** y envía una consulta de prueba.
+El estado **Configurado** indica que se habilitó el proveedor. Una respuesta real
+confirma que las credenciales y los permisos del modelo funcionan.
+
 ## Diagnóstico de puertos
 
 El indicador verde ya no depende únicamente de `/health`. ClassForge verifica además la identidad del proceso esperado. Si otro proceso ocupa 8092, 8093 o 8094 y responde un health genérico, el panel mostrará `MISMATCH` en lugar de READY.

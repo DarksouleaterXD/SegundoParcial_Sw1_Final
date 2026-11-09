@@ -1,4 +1,6 @@
 package com.classforge.assistant.providers;
+
+import com.classforge.assistant.tools.GeminiAssistantGateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -9,24 +11,39 @@ import java.util.List;
 public class AssistantProviderRegistry {
     private final String defaultProvider, llamaModel, bedrockModel;
     private final boolean bedrockEnabled;
+    private final GeminiAssistantGateway gemini;
     public AssistantProviderRegistry(@Value("${classforge.assistant.text.provider:llama-cpp}") String defaultProvider,
         @Value("${classforge.assistant.llama-model:local-model}") String llamaModel,
         @Value("${classforge.assistant.bedrock.text-model:us.amazon.nova-2-lite-v1:0}") String bedrockModel,
-        @Value("${classforge.assistant.bedrock.enabled:false}") boolean bedrockEnabled) {
-        this.defaultProvider=defaultProvider; this.llamaModel=llamaModel; this.bedrockModel=bedrockModel; this.bedrockEnabled=bedrockEnabled;
+        @Value("${classforge.assistant.bedrock.enabled:false}") boolean bedrockEnabled,
+        GeminiAssistantGateway gemini) {
+        this.defaultProvider = defaultProvider;
+        this.llamaModel = llamaModel;
+        this.bedrockModel = bedrockModel;
+        this.bedrockEnabled = bedrockEnabled;
+        this.gemini = gemini;
     }
     public record Option(String id, String name, String model, boolean enabled, String note) {}
     public record Configuration(String defaultProvider, List<Option> providers) {}
     public Configuration configuration() {
         return new Configuration(defaultProvider, List.of(
             new Option("llama-cpp","llama.cpp",llamaModel,true,"Requiere un servidor de modelos accesible. Las propuestas requieren soporte de herramientas."),
+            new Option("gemini", "Google Gemini", gemini.model(), gemini.configured(),
+                gemini.configured() ? "Envía el texto y el contexto UML a Gemini. La grabación se transcribe en este equipo."
+                        : "Requiere GEMINI_API_KEY en el servidor."),
             new Option("bedrock","Amazon Bedrock",bedrockEnabled ? bedrockModel : "",bedrockEnabled,
                 bedrockEnabled ? "Configurado. Las credenciales y el acceso al modelo se validan al enviar una solicitud." : "No habilitado en este servidor.")
         ));
     }
     public String resolve(String requested) {
         String selected = requested == null || requested.isBlank() ? defaultProvider : requested;
-        if (!"llama-cpp".equals(selected) && !("bedrock".equals(selected) && bedrockEnabled))
+        boolean enabled = switch (selected) {
+            case "llama-cpp" -> true;
+            case "gemini" -> gemini.configured();
+            case "bedrock" -> bedrockEnabled;
+            default -> false;
+        };
+        if (!enabled)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El proveedor seleccionado no está habilitado.");
         return selected;
     }

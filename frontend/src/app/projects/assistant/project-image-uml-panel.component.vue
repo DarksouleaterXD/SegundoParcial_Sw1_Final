@@ -21,7 +21,10 @@ export default defineComponent({
     <section class="image-panel">
       <header class="image-header">
         <span aria-hidden="true" class="material-symbols-rounded">image</span>
-        <strong>Imagen a UML</strong>
+        <div>
+          <h2>Imagen a UML</h2>
+          <p>Importa un diagrama y revisa los elementos reconocidos antes de incorporarlos.</p>
+        </div>
       </header>
       <input
         type="file"

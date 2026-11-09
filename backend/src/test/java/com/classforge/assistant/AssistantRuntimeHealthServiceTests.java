@@ -110,7 +110,8 @@ class AssistantRuntimeHealthServiceTests {
                 visionModel,
                 "us-east-1",
                 "us.amazon.nova-2-lite-v1:0",
-                "us.amazon.nova-2-lite-v1:0"
+                "us.amazon.nova-2-lite-v1:0",
+                mock(com.classforge.assistant.tools.GeminiAssistantGateway.class)
         );
     }
 

@@ -32,6 +32,9 @@ classforge:
     llama-url: ${CLASSFORGE_ASSISTANT_LLAMA_URL:http://127.0.0.1:8092}
     llama-model: ${CLASSFORGE_ASSISTANT_LLAMA_MODEL:local-model}
     whisper-url: ${CLASSFORGE_ASSISTANT_WHISPER_URL:http://127.0.0.1:8093}
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: ${CLASSFORGE_GEMINI_MODEL:gemini-3.5-flash}
     bedrock:
       enabled: ${CLASSFORGE_BEDROCK_ENABLED:false}
       region: ${AWS_REGION:us-east-1}

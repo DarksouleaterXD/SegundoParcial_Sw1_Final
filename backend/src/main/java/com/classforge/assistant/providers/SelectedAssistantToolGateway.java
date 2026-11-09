@@ -10,11 +10,21 @@ public class SelectedAssistantToolGateway implements AssistantToolCallingGateway
     private final AssistantProviderRegistry registry;
     private final ObjectProvider<LlamaNativeToolCallingGateway> llama;
     private final ObjectProvider<BedrockToolCallingGateway> bedrock;
+    private final GeminiAssistantGateway gemini;
     public SelectedAssistantToolGateway(AssistantProviderRegistry registry, ObjectProvider<LlamaNativeToolCallingGateway> llama,
-        ObjectProvider<BedrockToolCallingGateway> bedrock) { this.registry=registry; this.llama=llama; this.bedrock=bedrock; }
+        ObjectProvider<BedrockToolCallingGateway> bedrock, GeminiAssistantGateway gemini) {
+        this.registry = registry;
+        this.llama = llama;
+        this.bedrock = bedrock;
+        this.gemini = gemini;
+    }
     private AssistantToolCallingGateway gateway(String provider) {
         var selected = registry.resolve(provider);
-        AssistantToolCallingGateway gateway = "bedrock".equals(selected) ? bedrock.getIfAvailable() : llama.getIfAvailable();
+        AssistantToolCallingGateway gateway = switch (selected) {
+            case "gemini" -> gemini;
+            case "bedrock" -> bedrock.getIfAvailable();
+            default -> llama.getIfAvailable();
+        };
         if (gateway == null) throw new com.classforge.assistant.AssistantPlanningException("El proveedor no está disponible en este servidor.");
         return gateway;
     }

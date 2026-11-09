@@ -1,6 +1,9 @@
 package com.classforge.assistant;
 
+import com.classforge.assistant.providers.AssistantProviderRegistry;
 import com.classforge.assistant.tools.AssistantNativeToolPlanner;
+import com.classforge.auth.persistence.UserEntity;
+import com.classforge.auth.persistence.UserRepository;
 import com.classforge.collaboration.protocol.UmlCommandPayload;
 import com.classforge.project.application.ProjectNotFoundException;
 import com.classforge.project.application.ProjectService;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,9 +42,15 @@ class AssistantMembershipAccessIntegrationTests {
     @Autowired
     private ProjectMembershipRepository projectMembershipRepository;
 
+    @Autowired
+    private UserRepository users;
+
+    @Autowired
+    private AssistantProviderRegistry providers;
+
     @Test
     void editorCanPlanTextButNoneIsRejectedBeforeCallingTheLlm() {
-        UUID ownerId = UUID.randomUUID();
+        UUID ownerId = createOwner();
         UUID editorId = UUID.randomUUID();
         UUID noneId = UUID.randomUUID();
 
@@ -89,7 +99,7 @@ class AssistantMembershipAccessIntegrationTests {
 
     @Test
     void editorCanReachVoicePipelineButNoneIsRejectedBeforeStt() {
-        UUID ownerId = UUID.randomUUID();
+        UUID ownerId = createOwner();
         UUID editorId = UUID.randomUUID();
         UUID noneId = UUID.randomUUID();
 
@@ -105,7 +115,7 @@ class AssistantMembershipAccessIntegrationTests {
                         projectService,
                         speechToTextGateway,
                         planService,
-                        new com.classforge.assistant.providers.AssistantProviderRegistry("llama-cpp", "test", "test", false)
+                        providers
                 );
 
         MockMultipartFile audio =
@@ -144,5 +154,10 @@ class AssistantMembershipAccessIntegrationTests {
         );
 
         verifyNoInteractions(speechToTextGateway);
+    }
+
+    private UUID createOwner() {
+        UUID id = UUID.randomUUID();
+        return users.save(new UserEntity(id, "Propietario", id + "@test.invalid", "unused", Instant.now())).getId();
     }
 }

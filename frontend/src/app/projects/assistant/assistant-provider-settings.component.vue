@@ -22,12 +22,11 @@ export default defineComponent({
 <template>
   <app-assistant-provider-settings class="studio-view">
     <section aria-label="Proveedor de inteligencia artificial" class="provider-settings">
-      <header>
-        <label for="assistant-provider">Proveedor de texto y voz</label>
-        <button type="button" :disabled="checking() || !selected()" @click="refresh()">
-          {{ checking() ? 'Comprobando…' : 'Comprobar conexión' }}
-        </button>
-      </header>
+      <h3>
+        <span aria-hidden="true" class="material-symbols-rounded">tune</span>
+        Conexión de IA
+      </h3>
+      <label for="assistant-provider">Proveedor de texto y voz</label>
       <select
         id="assistant-provider"
         :value="selected()"
@@ -47,10 +46,6 @@ export default defineComponent({
           <p>{{ option.note }}</p>
         </template>
       </template>
-      <p>
-        La selección se conserva en este navegador para este proyecto. No cambia la configuración de otros
-        usuarios. Las claves y direcciones se administran en el servidor; imágenes usa su proveedor propio.
-      </p>
       <template v-if="status()">
         <template v-for="health in present(status())">
           <div class="availability">
@@ -62,13 +57,26 @@ export default defineComponent({
           <p>
             {{
               health.llama.state === 'CONFIGURED'
-                ? 'Bedrock está configurado; el acceso real al modelo aún no está comprobado.'
+                ? 'El proveedor está configurado. Envía una consulta para comprobar el acceso al modelo.'
                 : 'La conexión no garantiza que el modelo soporte las herramientas necesarias para proponer cambios.'
             }}
           </p>
-          <small>Última comprobación: {{ checkedAt() }}</small>
         </template>
       </template>
+      <div class="connection-actions">
+        <button type="button" :disabled="checking() || !selected()" @click="refresh()">
+          <span aria-hidden="true" class="material-symbols-rounded">sync</span>
+          {{ checking() ? 'Comprobando…' : 'Comprobar conexión' }}
+        </button>
+        <small v-if="status()">Última comprobación: {{ checkedAt() }}</small>
+      </div>
+      <details>
+        <summary>Sobre esta configuración</summary>
+        <p>
+          La selección se guarda en este navegador para este proyecto. Las claves y direcciones se administran
+          en el servidor. El asistente de imágenes usa su propio proveedor.
+        </p>
+      </details>
       <template v-if="error()">
         <p role="status" class="error">{{ error() }}</p>
         <button type="button" :disabled="busy()" @click="loadAgain()">Recargar configuración</button>
@@ -78,35 +86,53 @@ export default defineComponent({
 </template>
 
 <style scoped lang="scss">
-app-assistant-provider-settings {
-  display: block;
-}
 .provider-settings {
-  padding: 14px;
-  background: #faf8fd;
-  border-bottom: 1px solid #e5ddef;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-border);
+  border-radius: 14px;
 }
-header {
+h3,
+.connection-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 9px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+h3 .material-symbols-rounded {
+  color: var(--cf-primary);
 }
 label {
-  color: #4e3b70;
-  font-size: 11px;
+  color: var(--cf-text);
+  font-size: 0.8rem;
   font-weight: 600;
 }
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
   font: inherit;
-  font-size: 10px;
-  color: #6944b5;
-  border: 1px solid #ded5e8;
-  border-radius: 6px;
-  padding: 7px 9px;
-  background: white;
+  font-size: 0.75rem;
+  color: var(--cf-primary);
+  border: 1px solid #d8cbe9;
+  border-radius: 8px;
+  padding: 5px 10px;
+  background: #f7f2fc;
   cursor: pointer;
+}
+button:hover:not(:disabled) {
+  background: #eee6f8;
+}
+button .material-symbols-rounded {
+  font-size: 1rem;
 }
 button:disabled {
   opacity: 0.6;
@@ -119,41 +145,65 @@ select {
   border-radius: 7px;
   padding: 10px;
   font: inherit;
-  font-size: 12px;
-  color: #4e3b70;
+  font-size: 0.875rem;
+  color: var(--cf-text);
   background: white;
 }
 p {
-  font-size: 10px;
-  line-height: 1.8;
-  color: #82778e;
-  margin: 8px 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--cf-muted);
+  margin: 0;
 }
 .model {
-  font-size: 11px;
-  color: #6944b5;
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f1eafa;
+  color: var(--cf-primary);
   overflow-wrap: anywhere;
 }
 .availability {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-  margin-top: 10px;
 }
 .availability span {
-  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
   padding: 5px 7px;
-  font-size: 10px;
+  font-size: 0.72rem;
   background: #fceef2;
   color: #9c435c;
+}
+.availability span::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 .availability span.available {
   background: #eee7f9;
   color: #6944b5;
 }
 small {
-  font-size: 9px;
-  color: #82778e;
+  font-size: 0.72rem;
+  color: var(--cf-muted);
+}
+details {
+  border-top: 1px solid var(--cf-border);
+  padding-top: 8px;
+}
+details p {
+  margin-top: 6px;
+}
+summary {
+  color: var(--cf-primary);
+  font-size: 0.78rem;
+  cursor: pointer;
 }
 .error {
   color: #a72c40;

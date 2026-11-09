@@ -1,6 +1,7 @@
 package com.classforge.assistant.context;
 
 import com.classforge.assistant.AssistantPlanningException;
+import com.classforge.assistant.tools.GeminiAssistantGateway;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class ConfiguredAssistantQuestionGateway implements AssistantQuestionGateway {
     private final JsonMapper json;
     private final ObjectProvider<BedrockRuntimeClient> bedrock;
+    private final GeminiAssistantGateway gemini;
     private final String provider, url, model, bedrockModel;
     private final com.classforge.assistant.providers.AssistantProviderRegistry registry;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
@@ -25,10 +27,11 @@ public class ConfiguredAssistantQuestionGateway implements AssistantQuestionGate
             @Value("${classforge.assistant.llama-url:http://127.0.0.1:8092}") String url,
             @Value("${classforge.assistant.llama-model:local-model}") String model,
             @Value("${classforge.assistant.bedrock.text-model:us.amazon.nova-2-lite-v1:0}") String bedrockModel,
-            com.classforge.assistant.providers.AssistantProviderRegistry registry) {
+            com.classforge.assistant.providers.AssistantProviderRegistry registry, GeminiAssistantGateway gemini) {
         this.json = json; this.bedrock = bedrock; this.provider = provider;
         this.url = url.replaceAll("/+$", ""); this.model = model; this.bedrockModel = bedrockModel;
         this.registry = registry;
+        this.gemini = gemini;
     }
     @Override public String answer(String system, String prompt) {
         return answer(system, prompt, provider);
@@ -37,7 +40,9 @@ public class ConfiguredAssistantQuestionGateway implements AssistantQuestionGate
         String provider = registry.resolve(selected);
         try {
             String answer;
-            if ("bedrock".equals(provider)) {
+            if ("gemini".equals(provider)) {
+                answer = gemini.answer(system, prompt);
+            } else if ("bedrock".equals(provider)) {
                 var client = bedrock.getIfAvailable();
                 if (client == null) throw new AssistantPlanningException("Amazon Bedrock no está habilitado.");
                 var result = client.converse(ConverseRequest.builder().modelId(bedrockModel)

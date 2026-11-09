@@ -665,19 +665,11 @@ export default defineComponent({
               tabindex="-1"
               ref="textAssistantPanel"
             >
-              <p class="assistant-context">
-                Consulta el modelo guardado o solicita una propuesta de cambios. Puedes incluir la
-                conversación reciente del equipo al consultar; los cambios requieren revisar y aplicar el
-                plan.
-              </p>
               <ProjectAssistantPanelComponentView></ProjectAssistantPanelComponentView>
             </section>
           </template>
           <template v-if="imageAssistantOpen()">
             <div id="image-assistant">
-              <p class="assistant-context">
-                Importa una imagen del diagrama y revisa los elementos reconocidos antes de incorporarlos.
-              </p>
               <ProjectImageUmlPanelComponentView></ProjectImageUmlPanelComponentView>
             </div>
           </template>
@@ -813,13 +805,23 @@ export default defineComponent({
             </section>
           </template>
         </template>
-        <div class="workspace-layout">
-          <section aria-labelledby="model-editor-title" class="model-editor">
+        <section class="workspace-layout" aria-labelledby="model-overview-title">
+          <header class="model-overview-heading">
+            <div>
+              <p class="eyebrow">ESTRUCTURA UML</p>
+              <h2 id="model-overview-title">Resumen del modelo</h2>
+            </div>
+            <p>Consulta y edita los elementos del diagrama.</p>
+          </header>
+          <div class="model-editor">
             <section aria-label="Modelo canónico" class="canonical-section">
               <div class="section-heading">
-                <div>
-                  <p class="eyebrow">MODELO CANÓNICO</p>
-                  <h2 id="model-editor-title">Clases y atributos</h2>
+                <div class="model-card-heading">
+                  <span aria-hidden="true" class="material-symbols-rounded model-card-icon">data_object</span>
+                  <div>
+                    <p class="eyebrow">MODELO CANÓNICO</p>
+                    <h3>Clases y atributos</h3>
+                  </div>
                 </div>
                 <div class="summary-pills">
                   <span>
@@ -983,11 +985,19 @@ export default defineComponent({
             </section>
             <section aria-labelledby="relationships-title" class="relationships-section">
               <div class="section-heading compact-heading">
-                <div>
-                  <p class="eyebrow">CONECTORES</p>
-                  <h2 id="relationships-title">Relaciones</h2>
+                <div class="model-card-heading">
+                  <span aria-hidden="true" class="material-symbols-rounded model-card-icon">
+                    conversion_path
+                  </span>
+                  <div>
+                    <p class="eyebrow">CONECTORES</p>
+                    <h3 id="relationships-title">Relaciones</h3>
+                  </div>
                 </div>
-                <span class="relationship-count">{{ store.relationships().length }}</span>
+                <span class="relationship-count">
+                  {{ store.relationships().length }}
+                  {{ store.relationships().length === 1 ? 'relación' : 'relaciones' }}
+                </span>
                 <button
                   type="button"
                   aria-controls="relationships-content"
@@ -1068,7 +1078,7 @@ export default defineComponent({
                 </div>
               </template>
             </section>
-          </section>
+          </div>
           <aside class="details-panel">
             <cf-card class="studio-card-outlined">
               <cf-card-header>
@@ -1100,28 +1110,30 @@ export default defineComponent({
                     </dd>
                   </div>
                   <div>
-                    <dt>Posiciones persistibles</dt>
+                    <dt>Posiciones guardadas</dt>
                     <dd>
                       {{ layoutNodeCount() }}
                     </dd>
                   </div>
                   <div>
-                    <dt>Revision persistida</dt>
+                    <dt>Revisión guardada</dt>
                     <dd>
                       {{ currentProject.revision }}
                     </dd>
                   </div>
                   <div>
-                    <dt>Ultimo guardado</dt>
+                    <dt>Último guardado</dt>
                     <dd>
-                      {{ formatDate(currentProject.updatedAt, 'medium') }}
+                      <time :datetime="currentProject.updatedAt">
+                        {{ formatDate(currentProject.updatedAt, 'medium') }}
+                      </time>
                     </dd>
                   </div>
                 </dl>
               </cf-card-content>
             </cf-card>
           </aside>
-        </div>
+        </section>
       </template>
     </section>
   </app-project-workspace-page>
