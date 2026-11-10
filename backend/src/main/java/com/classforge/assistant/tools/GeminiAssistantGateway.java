@@ -15,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,28 @@ public class GeminiAssistantGateway implements AssistantToolCallingGateway {
     }
 
     public String answer(String system, String prompt) {
-        JsonNode parts = generate(system, prompt, Map.of());
+        return textFrom(generate(system, prompt, Map.of()));
+    }
+
+    public String transcribe(byte[] wavAudio) {
+        JsonNode parts = generate(
+                "Transcribe las palabras de la grabación literalmente, en el idioma hablado. "
+                        + "Devuelve solo la transcripción. Si no hay voz, devuelve una respuesta vacía.",
+                List.of(Map.of("inlineData", Map.of(
+                        "mimeType", "audio/wav",
+                        "data", Base64.getEncoder().encodeToString(wavAudio)
+                ))),
+                Map.of("generationConfig", Map.of("maxOutputTokens", 512)),
+                Duration.ofSeconds(35)
+        );
+        String transcript = textFrom(parts).strip();
+        if (transcript.isBlank()) {
+            throw new AssistantPlanningException("No se reconoció voz en la grabación.");
+        }
+        return transcript;
+    }
+
+    private String textFrom(JsonNode parts) {
         List<String> text = new ArrayList<>();
         for (JsonNode part : parts) {
             if (!part.path("thought").asBoolean(false) && part.path("text").isString()) {
@@ -114,17 +136,26 @@ public class GeminiAssistantGateway implements AssistantToolCallingGateway {
     }
 
     private JsonNode generate(String system, String prompt, Map<String, Object> tools) {
+        return generate(system, List.of(Map.of("text", prompt)), tools, Duration.ofSeconds(90));
+    }
+
+    private JsonNode generate(
+            String system,
+            List<Map<String, Object>> input,
+            Map<String, Object> options,
+            Duration timeout
+    ) {
         if (!configured()) {
             throw new AssistantPlanningException("Gemini requiere una clave de API configurada en el servidor.");
         }
         var body = new LinkedHashMap<String, Object>();
         body.put("systemInstruction", Map.of("parts", List.of(Map.of("text", system))));
-        body.put("contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", prompt)))));
+        body.put("contents", List.of(Map.of("role", "user", "parts", input)));
         body.put("generationConfig", Map.of("maxOutputTokens", 4096));
-        body.putAll(tools);
+        body.putAll(options);
         try {
             var request = HttpRequest.newBuilder(endpoint)
-                    .timeout(Duration.ofSeconds(90))
+                    .timeout(timeout)
                     .header("x-goog-api-key", apiKey)
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)))

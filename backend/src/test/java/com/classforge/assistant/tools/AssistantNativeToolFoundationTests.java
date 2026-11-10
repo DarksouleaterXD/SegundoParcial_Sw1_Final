@@ -4,6 +4,7 @@ import com.classforge.assistant.AssistantActionType;
 import com.classforge.assistant.AssistantEntityReferenceResolver;
 import com.classforge.assistant.AssistantIntentHintResolver;
 import com.classforge.assistant.AssistantPlanningException;
+import com.classforge.assistant.vision.VisionCodeIdentifierCanonicalizer;
 import com.classforge.project.domain.document.DiagramLayout;
 import com.classforge.project.domain.document.DiagramNodeLayout;
 import com.classforge.project.domain.document.Multiplicity;
@@ -34,7 +35,8 @@ class AssistantNativeToolFoundationTests {
     private final AssistantIntentHintResolver intentHintResolver = new AssistantIntentHintResolver();
     private final AssistantLiteralArgumentBinder literalBinder = new AssistantLiteralArgumentBinder();
     private final DynamicUmlToolCatalog catalogBuilder = new DynamicUmlToolCatalog(intentHintResolver);
-    private final UmlToolCallResolver resolver = new UmlToolCallResolver(entityResolver, literalBinder);
+    private final UmlToolCallResolver resolver =
+            new UmlToolCallResolver(entityResolver, literalBinder, new VisionCodeIdentifierCanonicalizer());
 
     @Test
     void classRenamePhraseWinsOverAttributeNamedNombre() {
@@ -112,6 +114,23 @@ class AssistantNativeToolFoundationTests {
         );
 
         assertEquals("HistorialClinco", resolution.plan().actions().getFirst().className());
+    }
+
+    @Test
+    void createClassAdaptsAccentsAndSpacesToAValidIdentifier() {
+        ProjectDocument document = fixture();
+        String instruction = "Crea una clase llamada Atención Médica";
+        AssistantToolCatalog catalog = catalogBuilder.build(instruction, document);
+        AssistantToolInvocation invocation = new AssistantToolInvocation(
+                "call-1", AssistantToolName.CREATE_CLASS,
+                jsonMapper.readTree("{\"name\":\"Atención Médica\"}")
+        );
+
+        AssistantToolResolution resolution = resolver.resolve(
+                instruction, List.of(invocation), catalog, document
+        );
+
+        assertEquals("Atencion_Medica", resolution.plan().actions().getFirst().className());
     }
 
     @Test

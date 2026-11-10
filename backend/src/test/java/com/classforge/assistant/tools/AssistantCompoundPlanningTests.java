@@ -7,6 +7,7 @@ import com.classforge.assistant.AssistantPlanGroundingFilter;
 import com.classforge.assistant.AssistantPlanNormalizer;
 import com.classforge.assistant.AssistantSemanticCompiler;
 import com.classforge.assistant.UmlAssistantCommandResolver;
+import com.classforge.assistant.vision.VisionCodeIdentifierCanonicalizer;
 import com.classforge.collaboration.application.ProjectCommandExecutor;
 import com.classforge.project.domain.document.DiagramLayout;
 import com.classforge.project.domain.document.DiagramNodeLayout;
@@ -72,7 +73,8 @@ class AssistantCompoundPlanningTests {
         AssistantNativeToolPlanner planner = new AssistantNativeToolPlanner(
                 new DynamicUmlToolCatalog(intentResolver),
                 gateway,
-                new UmlToolCallResolver(entityResolver, new AssistantLiteralArgumentBinder()),
+                new UmlToolCallResolver(entityResolver, new AssistantLiteralArgumentBinder(),
+                        new VisionCodeIdentifierCanonicalizer()),
                 new AssistantToolRouteAdjudicator(
                         intentResolver,
                         entityResolver,

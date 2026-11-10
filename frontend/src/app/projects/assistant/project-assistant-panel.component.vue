@@ -1,20 +1,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { ProjectAssistantPanelComponent } from './project-assistant-panel.component';
-import { assistantProviderLabel } from './assistant-model';
 import { present, setupView } from '../../core/view-state';
 import AssistantHistoryComponentView from './assistant-history.component.vue';
-import AssistantProviderSettingsComponentView from './assistant-provider-settings.component.vue';
 
 export default defineComponent({
   name: 'ProjectAssistantPanelComponentView',
-  components: { AssistantHistoryComponentView, AssistantProviderSettingsComponentView },
+  components: { AssistantHistoryComponentView },
 
   setup(props, { emit }) {
     return {
       ...setupView(ProjectAssistantPanelComponent, props, emit, {}),
       present,
-      assistantProviderLabel,
 
       asValue: (target: EventTarget | null) => target as HTMLInputElement,
     };
@@ -37,7 +34,7 @@ export default defineComponent({
           </div>
         </div>
       </header>
-      <div class="assistant-workspace">
+      <div class="assistant-workspace" :class="{ 'is-query': mode() === 'QUERY' }">
         <div class="assistant-conversation">
           <div role="group" aria-label="Modo del asistente" class="assistant-mode">
             <button
@@ -91,8 +88,7 @@ export default defineComponent({
                   <template v-if="message.context">
                     <template v-for="context in present(message.context)">
                       <small class="answer-context">
-                        {{ assistantProviderLabel(context.provider) }} · Modelo:
-                        revisión {{ context.revision }} ·
+                        Revisión {{ context.revision }} ·
                         {{
                           context.included
                             ? context.messages + ' mensajes del equipo'
@@ -302,7 +298,6 @@ export default defineComponent({
               <button
                 type="button"
                 :disabled="
-                  !provider() ||
                   planning() ||
                   voiceBusy() ||
                   (mode() === 'CHANGE' && !!store.assistantPlanningBlockReason()) ||
@@ -316,6 +311,9 @@ export default defineComponent({
                 Enviar
               </button>
             </div>
+            <small v-if="mode() === 'CHANGE'" class="composer-count">
+              El audio puede enviarse al servicio de IA configurado para transcribir la instrucción.
+            </small>
             <div v-if="mode() === 'QUERY' && planning()" role="status" class="assistant-thinking query-progress">
               <span aria-hidden="true" class="studio-spinner" style="--spinner-size: 16px"></span>
               Consultando el modelo UML…
@@ -328,18 +326,8 @@ export default defineComponent({
             </template>
           </div>
         </div>
-        <aside class="assistant-settings" aria-label="Configuración de la consulta">
-          <template v-if="store.project()">
-            <template v-for="project in present(store.project())">
-              <AssistantProviderSettingsComponentView
-                :project-id="project.id"
-                :busy="planning() || voiceBusy()"
-                @selected-change="selectProvider($event)"
-                @health-change="runtimeHealth.set($event)"
-              ></AssistantProviderSettingsComponentView>
-            </template>
-          </template>
-          <template v-if="mode() === 'QUERY'">
+        <template v-if="mode() === 'QUERY'">
+          <aside class="assistant-settings" aria-label="Configuración de la consulta">
             <div class="query-context">
               <h3>Visibilidad de la consulta</h3>
               <p>
@@ -393,8 +381,8 @@ export default defineComponent({
                 </p>
               </template>
             </div>
-          </template>
-        </aside>
+          </aside>
+        </template>
       </div>
     </section>
   </app-project-assistant-panel>

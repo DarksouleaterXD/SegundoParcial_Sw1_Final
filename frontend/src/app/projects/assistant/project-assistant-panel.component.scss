@@ -1,10 +1,14 @@
 .assistant-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(14px, 2vw, 24px);
   padding: clamp(14px, 2vw, 24px);
   align-items: start;
   background: #f8f6fc;
+}
+
+.assistant-workspace.is-query {
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
 }
 
 .assistant-conversation,
@@ -451,7 +455,7 @@
 }
 
 @media (max-width: 1040px) {
-  .assistant-workspace {
+  .assistant-workspace.is-query {
     grid-template-columns: minmax(0, 1fr);
   }
 }

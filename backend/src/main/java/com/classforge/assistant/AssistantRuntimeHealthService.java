@@ -62,7 +62,8 @@ public class AssistantRuntimeHealthService {
     public AssistantRuntimeHealthResponse healthForProvider(UUID userId, UUID projectId, String selectedProvider) {
         projectService.get(userId, projectId);
 
-        AssistantRuntimeStatus text = switch (normalized(selectedProvider, "llama-cpp")) {
+        String provider = normalized(selectedProvider, "llama-cpp");
+        AssistantRuntimeStatus text = switch (provider) {
             case "gemini" -> new AssistantRuntimeStatus(
                     "gemini", gemini.configured(), gemini.configured() ? "CONFIGURED" : "UNAVAILABLE", 0,
                     gemini.configured() ? gemini.model() + " · El acceso se verifica al enviar una consulta"
@@ -71,7 +72,9 @@ public class AssistantRuntimeHealthService {
             default -> runtimeProbe.probe("llama.cpp", llamaUrl);
         };
 
-        AssistantRuntimeStatus whisper = runtimeProbe.probe("whisper.cpp", whisperUrl);
+        AssistantRuntimeStatus whisper = "gemini".equals(provider)
+                ? new AssistantRuntimeStatus("gemini-audio", text.available(), text.state(), 0, text.message())
+                : runtimeProbe.probe("whisper.cpp", whisperUrl);
 
         AssistantRuntimeStatus vision = "bedrock".equals(visionProvider)
                 ? configuredBedrock("bedrock-vision", bedrockVisionModel)

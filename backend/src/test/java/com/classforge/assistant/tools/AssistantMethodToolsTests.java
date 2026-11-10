@@ -1,6 +1,7 @@
 package com.classforge.assistant.tools;
 
 import com.classforge.assistant.*;
+import com.classforge.assistant.vision.VisionCodeIdentifierCanonicalizer;
 import com.classforge.collaboration.application.ProjectCommandExecutor;
 import com.classforge.project.domain.document.*;
 import com.classforge.project.validation.ProjectDocumentValidator;
@@ -13,7 +14,8 @@ class AssistantMethodToolsTests {
     final JsonMapper json = JsonMapper.builder().build();
     final AssistantEntityReferenceResolver entities = new AssistantEntityReferenceResolver();
     final DynamicUmlToolCatalog catalogs = new DynamicUmlToolCatalog(new AssistantIntentHintResolver());
-    final UmlToolCallResolver tools = new UmlToolCallResolver(entities, new AssistantLiteralArgumentBinder());
+    final UmlToolCallResolver tools = new UmlToolCallResolver(entities, new AssistantLiteralArgumentBinder(),
+            new VisionCodeIdentifierCanonicalizer());
     final UmlAssistantCommandResolver commands = new UmlAssistantCommandResolver(new ProjectCommandExecutor(), new AssistantPlanNormalizer());
     ProjectDocument fixture(List<UmlMethod> methods) {
         var id = UUID.randomUUID();

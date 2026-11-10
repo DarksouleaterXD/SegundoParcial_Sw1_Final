@@ -24,9 +24,9 @@ export class AssistantApiService {
   providerHealth(projectId: string, provider: string) {
     return this.http.get<AssistantRuntimeHealthResponse>(`/api/projects/${projectId}/assistant/providers/health`, {params:{provider}});
   }
-  ask(projectId: string, text: string, includeTeamChat: boolean, provider?: string, shared = false) {
+  ask(projectId: string, text: string, includeTeamChat: boolean, shared = false) {
     return this.http.post<{ answer: string; baseRevision: number; modelChanged: boolean; teamChatIncluded: boolean; teamMessageIds: number[]; previousExchanges: number; memorySaved: boolean }>(
-      `/api/projects/${projectId}/assistant/ask`, { text, includeTeamChat, provider, shared },
+      `/api/projects/${projectId}/assistant/ask`, { text, includeTeamChat, shared },
     );
   }
   private readonly http =
@@ -35,18 +35,16 @@ export class AssistantApiService {
   plan(
     projectId: string,
     text: string,
-    provider?: string,
   ) {
     return this.http.post<AssistantPlanResponse>(
       `/api/projects/${projectId}/assistant/plan`,
-      { text, provider },
+      { text },
     );
   }
 
   voice(
     projectId: string,
     audio: Blob,
-    provider?: string,
   ) {
     const form =
       new FormData();
@@ -56,8 +54,6 @@ export class AssistantApiService {
       audio,
       'classforge-voice.wav',
     );
-    if (provider) form.append('provider', provider);
-
     return this.http.post<AssistantPlanResponse>(
       `/api/projects/${projectId}/assistant/voice`,
       form,

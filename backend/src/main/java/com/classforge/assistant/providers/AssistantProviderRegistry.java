@@ -29,7 +29,7 @@ public class AssistantProviderRegistry {
         return new Configuration(defaultProvider, List.of(
             new Option("llama-cpp","llama.cpp",llamaModel,true,"Requiere un servidor de modelos accesible. Las propuestas requieren soporte de herramientas."),
             new Option("gemini", "Google Gemini", gemini.model(), gemini.configured(),
-                gemini.configured() ? "Envía el texto y el contexto UML a Gemini. La grabación se transcribe en este equipo."
+                gemini.configured() ? "Envía el texto, el contexto UML y las grabaciones a Gemini."
                         : "Requiere GEMINI_API_KEY en el servidor."),
             new Option("bedrock","Amazon Bedrock",bedrockEnabled ? bedrockModel : "",bedrockEnabled,
                 bedrockEnabled ? "Configurado. Las credenciales y el acceso al modelo se validan al enviar una solicitud." : "No habilitado en este servidor.")

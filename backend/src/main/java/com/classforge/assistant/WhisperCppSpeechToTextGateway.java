@@ -157,7 +157,7 @@ public class WhisperCppSpeechToTextGateway
         }
     }
 
-    void validateWav(
+    static void validateWav(
             byte[] wavAudio
     ) {
         if (

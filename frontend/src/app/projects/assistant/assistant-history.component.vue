@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { AssistantHistoryComponent } from './assistant-history.component';
-import { assistantProviderLabel } from './assistant-model';
 import { setupView } from '../../core/view-state';
 
 export default defineComponent({
@@ -12,7 +11,6 @@ export default defineComponent({
   setup(props, { emit }) {
     return {
       ...setupView(AssistantHistoryComponent, props, emit),
-      assistantProviderLabel,
     };
   },
 });
@@ -78,8 +76,7 @@ export default defineComponent({
             <p class="question">{{ entry.question }}</p>
             <p>{{ entry.answer }}</p>
             <small>
-              {{ assistantProviderLabel(entry.provider) }} · Revisión
-              {{ entry.revision }} ·
+              Revisión {{ entry.revision }} ·
               {{ entry.teamChatIncluded ? 'Incluyó chat del equipo' : 'Sin chat del equipo' }}
             </small>
           </article>

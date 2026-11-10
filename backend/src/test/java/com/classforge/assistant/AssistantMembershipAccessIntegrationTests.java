@@ -115,7 +115,8 @@ class AssistantMembershipAccessIntegrationTests {
                         projectService,
                         speechToTextGateway,
                         planService,
-                        providers
+                        providers,
+                        mock(com.classforge.assistant.tools.GeminiAssistantGateway.class)
                 );
 
         MockMultipartFile audio =
@@ -138,7 +139,7 @@ class AssistantMembershipAccessIntegrationTests {
 
         when(speechToTextGateway.transcribe(any(byte[].class), anyString()))
                 .thenReturn("crea animal");
-        when(planService.planVoice(editorId, project.id(), "crea animal"))
+        when(planService.planVoice(editorId, project.id(), "crea animal", providers.resolve(null)))
                 .thenReturn(expected);
 
         AssistantPlanResponse actual =

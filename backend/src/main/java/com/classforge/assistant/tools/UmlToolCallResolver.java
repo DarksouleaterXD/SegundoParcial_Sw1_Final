@@ -6,6 +6,7 @@ import com.classforge.assistant.AssistantPlanAction;
 import com.classforge.assistant.AssistantPlanningException;
 import com.classforge.assistant.AssistantSemanticPlan;
 import com.classforge.assistant.AssistantTypeSource;
+import com.classforge.assistant.vision.VisionCodeIdentifierCanonicalizer;
 import com.classforge.project.domain.document.ProjectDocument;
 import com.classforge.project.domain.document.UmlDataType;
 import com.classforge.project.domain.document.UmlRelationshipType;
@@ -32,13 +33,16 @@ public class UmlToolCallResolver {
 
     private final AssistantEntityReferenceResolver entityResolver;
     private final AssistantLiteralArgumentBinder literalBinder;
+    private final VisionCodeIdentifierCanonicalizer identifiers;
 
     public UmlToolCallResolver(
             AssistantEntityReferenceResolver entityResolver,
-            AssistantLiteralArgumentBinder literalBinder
+            AssistantLiteralArgumentBinder literalBinder,
+            VisionCodeIdentifierCanonicalizer identifiers
     ) {
         this.entityResolver = entityResolver;
         this.literalBinder = literalBinder;
+        this.identifiers = identifiers;
     }
 
     public AssistantToolResolution resolve(
@@ -175,7 +179,8 @@ public class UmlToolCallResolver {
     }
 
     private ResolvedAction createClass(String userText, JsonNode args) {
-        String newName = literalBinder.bindNewIdentifier(userText, requiredText(args, "name"));
+        String newName = identifiers.canonicalize(
+                literalBinder.bindNewIdentifier(userText, requiredText(args, "name")), "El nombre de la clase");
         List<AssistantAttributePlan> attributes = List.of();
 
         AssistantPlanAction action = new AssistantPlanAction(
@@ -210,7 +215,8 @@ public class UmlToolCallResolver {
     ) {
         ExistingClass selected = existingClass(requiredText(args, "existing_class"), catalog, document);
         ExistingClass existing = bindUnaryClassReference(userText, selected, catalog, document);
-        String newName = literalBinder.bindNewIdentifier(userText, requiredText(args, "new_name"));
+        String newName = identifiers.canonicalize(
+                literalBinder.bindNewIdentifier(userText, requiredText(args, "new_name")), "El nombre de la clase");
 
         AssistantPlanAction action = emptyAction(
                 AssistantToolName.RENAME_CLASS,

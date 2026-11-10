@@ -1,5 +1,7 @@
 package com.classforge.assistant;
 
+import com.classforge.assistant.providers.AssistantProviderRegistry;
+import com.classforge.assistant.tools.GeminiAssistantGateway;
 import com.classforge.project.application.ProjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,13 +15,15 @@ public class AssistantVoiceService {
     private final ProjectService projectService;
     private final SpeechToTextGateway speechToTextGateway;
     private final AssistantPlanService planService;
-    private final com.classforge.assistant.providers.AssistantProviderRegistry providers;
+    private final AssistantProviderRegistry providers;
+    private final GeminiAssistantGateway gemini;
 
     public AssistantVoiceService(
             ProjectService projectService,
             SpeechToTextGateway speechToTextGateway,
             AssistantPlanService planService,
-            com.classforge.assistant.providers.AssistantProviderRegistry providers
+            AssistantProviderRegistry providers,
+            GeminiAssistantGateway gemini
     ) {
         this.projectService =
                 projectService;
@@ -30,6 +34,7 @@ public class AssistantVoiceService {
         this.planService =
                 planService;
         this.providers = providers;
+        this.gemini = gemini;
     }
 
     public AssistantPlanResponse plan(
@@ -44,7 +49,7 @@ public class AssistantVoiceService {
                 userId,
                 projectId
         );
-        if (provider != null) providers.resolve(provider);
+        String selectedProvider = providers.resolve(provider);
 
         if (
                 audio == null
@@ -67,11 +72,13 @@ public class AssistantVoiceService {
         String transcript;
 
         try {
-            transcript =
-                    speechToTextGateway.transcribe(
-                            audio.getBytes(),
-                            audio.getOriginalFilename()
-                    );
+            byte[] wav = audio.getBytes();
+            if ("gemini".equals(selectedProvider)) {
+                WhisperCppSpeechToTextGateway.validateWav(wav);
+                transcript = gemini.transcribe(wav);
+            } else {
+                transcript = speechToTextGateway.transcribe(wav, audio.getOriginalFilename());
+            }
         } catch (
                 AssistantPlanningException exception
         ) {
@@ -95,7 +102,6 @@ public class AssistantVoiceService {
             );
         }
 
-        return provider == null ? planService.planVoice(userId, projectId, transcript)
-                : planService.planVoice(userId, projectId, transcript, provider);
+        return planService.planVoice(userId, projectId, transcript, selectedProvider);
     }
 }

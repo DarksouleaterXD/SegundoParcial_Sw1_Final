@@ -85,6 +85,18 @@ class GeminiAssistantGatewayTests {
     }
 
     @Test
+    void sendsWavAudioInlineAndReturnsTheTranscript() {
+        response = """
+                {"candidates":[{"content":{"parts":[{"text":"Crea la clase Cliente."}]}}]}
+                """;
+
+        assertEquals("Crea la clase Cliente.", gateway.transcribe(new byte[] {1, 2, 3}));
+        assertEquals("audio/wav", request.get().at("/contents/0/parts/0/inlineData/mimeType").asString());
+        assertEquals("AQID", request.get().at("/contents/0/parts/0/inlineData/data").asString());
+        assertTrue(request.get().path("tools").isMissingNode());
+    }
+
+    @Test
     void reportsQuotaErrorsWithoutReturningTheProviderBody() {
         status = 429;
         response = "{\"error\":\"internal details\"}";

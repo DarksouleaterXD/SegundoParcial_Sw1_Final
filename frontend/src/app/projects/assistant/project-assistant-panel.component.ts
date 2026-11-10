@@ -1,4 +1,4 @@
-import { DestroyScope,untracked,useService,signal,untilDestroyed } from '../../core/view-state';
+import { DestroyScope,useService,signal,untilDestroyed } from '../../core/view-state';
 import { FormControl,Validators } from '../../core/forms';
 import { HttpErrorResponse } from '../../core/api/http-client';
 import { AssistantChangeReview,reviewAssistantCommand } from './assistant-change-review';
@@ -20,13 +20,12 @@ import {
 AssistantAttributePlan,
 AssistantPlanAction,
 AssistantPlanResponse,
-AssistantRuntimeHealthResponse,
 } from './assistant-model';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   text: string;
-  context?: { revision: number; messages: number; included: boolean; changed: boolean; provider: string };
+  context?: { revision: number; messages: number; included: boolean; changed: boolean };
 }
 
 export class ProjectAssistantPanelComponent
@@ -34,12 +33,6 @@ export class ProjectAssistantPanelComponent
   private readonly api = useService(AssistantApiService);
   private readonly destroyRef = useService(DestroyScope);
   readonly mode = signal<'QUERY' | 'CHANGE'>('QUERY');
-  readonly provider = signal('');
-  selectProvider(provider: string): void {
-    if (provider === untracked(() => this.provider())) return;
-    this.provider.set(provider); this.runtimeHealth.set(null); this.plan.set(null); this.review.set(null);
-    this.deletionAcknowledged.set(false); this.error.set(null);
-  }
   readonly includeTeamChat = signal(false);
   readonly sharedQuery = signal(false);
   readonly historyRefresh = signal(0);
@@ -52,7 +45,6 @@ export class ProjectAssistantPanelComponent
     validators: [Validators.required, Validators.maxLength(1000)],
   });
   readonly planning = signal(false);
-  readonly runtimeHealth = signal<AssistantRuntimeHealthResponse | null>(null);
   readonly voiceState = signal<'idle' | 'recording' | 'transcribing'>('idle');
   readonly plan = signal<AssistantPlanResponse | null>(null);
   readonly review = signal<AssistantChangeReview | null>(null);
@@ -61,15 +53,10 @@ export class ProjectAssistantPanelComponent
   readonly messages = signal<ChatMessage[]>([]);
 
   send(): void {
-    if (!this.provider()) return;
     if (this.mode() === 'QUERY') { this.ask(); return; }
     const project = this.store.project();
     const text = this.prompt.value.trim();
     if (!project || !text || this.prompt.invalid || this.planning() || this.voiceBusy()) {
-      return;
-    }
-    if (!this.runtimeReadyForText()) {
-      this.error.set('El proveedor de texto no está disponible. Inícialo y pulsa Comprobar conexión.');
       return;
     }
     const blockReason = this.store.assistantPlanningBlockReason();
@@ -82,7 +69,7 @@ export class ProjectAssistantPanelComponent
     this.error.set(null);
     this.plan.set(null);
     this.planning.set(true);
-    this.api.plan(project.id, text, this.provider()).pipe(
+    this.api.plan(project.id, text).pipe(
       finalize(() => this.planning.set(false)),
     ).subscribe({
       next: (plan) => {
@@ -94,8 +81,8 @@ export class ProjectAssistantPanelComponent
           { role: 'assistant', text: plan.summary },
         ]);
       },
-      error: (error: unknown) => {
-        const message = this.planError(error);
+      error: () => {
+        const message = 'No se pudo preparar la propuesta. Intenta nuevamente.';
         this.error.set(message);
         this.messages.update((messages) => [
           ...messages,
@@ -110,8 +97,7 @@ export class ProjectAssistantPanelComponent
     const text = this.prompt.value.trim();
     if (!project || !text || this.prompt.invalid || this.planning() || this.voiceBusy()) return;
     this.error.set(null); this.planning.set(true);
-    const provider = this.provider();
-    this.api.ask(project.id, text, this.includeTeamChat(), provider, this.sharedQuery()).pipe(
+    this.api.ask(project.id, text, this.includeTeamChat(), this.sharedQuery()).pipe(
       untilDestroyed(this.destroyRef), finalize(() => this.planning.set(false)),
     ).subscribe({
       next: result => {
@@ -123,7 +109,7 @@ export class ProjectAssistantPanelComponent
       },
       error: (error: HttpErrorResponse) => {
         this.error.set(error.status === 404 ? 'Ya no tienes acceso a este proyecto.'
-          : error.status === 503 ? (error.error?.message ?? 'El proveedor de IA no está disponible.')
+          : error.status === 503 ? 'El asistente no está disponible en este momento.'
           : 'No se pudo realizar la consulta. Tu pregunta sigue disponible para reintentar.');
       },
     });
@@ -162,10 +148,6 @@ export class ProjectAssistantPanelComponent
       return;
     }
     if (this.voiceBusy() || this.planning()) {
-      return;
-    }
-    if (!this.runtimeReadyForVoice()) {
-      this.error.set('Para usar el micrófono deben estar disponibles el proveedor de texto y Whisper. Pulsa Comprobar conexión para ver su estado.');
       return;
     }
     const blockReason = this.store.assistantPlanningBlockReason();
@@ -254,7 +236,7 @@ export class ProjectAssistantPanelComponent
       this.planning.set(true);
       this.error.set(null);
       this.plan.set(null);
-      this.api.voice(project.id, audio, this.provider()).pipe(
+      this.api.voice(project.id, audio).pipe(
         finalize(() => {
           this.planning.set(false);
           this.voiceState.set('idle');
@@ -270,7 +252,7 @@ export class ProjectAssistantPanelComponent
             { role: 'assistant', text: plan.summary },
           ]);
         },
-        error: (error: unknown) => this.error.set(this.planError(error)),
+        error: () => this.error.set('No se pudo preparar una propuesta con la grabación. Intenta nuevamente.'),
       });
     } catch {
       await this.recorder.cancel();
@@ -278,22 +260,6 @@ export class ProjectAssistantPanelComponent
       this.planning.set(false);
       this.error.set('No pudimos procesar la grabación.');
     }
-  }
-
-  private runtimeReadyForText(): boolean {
-    return this.runtimeHealth()?.readyForText ?? false;
-  }
-
-  private planError(error: unknown): string {
-    if (this.provider() === 'gemini' && error instanceof HttpErrorResponse
-        && error.status === 503 && typeof error.error?.message === 'string') {
-      return error.error.message;
-    }
-    return 'El asistente no está disponible en este momento.';
-  }
-
-  private runtimeReadyForVoice(): boolean {
-    return this.runtimeHealth()?.readyForVoice ?? false;
   }
 
   private acceptFreshPlan(plan: AssistantPlanResponse): boolean {
